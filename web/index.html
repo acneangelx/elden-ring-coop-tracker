@@ -4,72 +4,77 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Elden Ring — Интерактивная карта (.co2)</title>
+<link rel="icon" type="image/png" href="favicon.png" />
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
 <link rel="stylesheet" href="vendor/leaflet/MarkerCluster.css" />
 <link rel="stylesheet" href="vendor/leaflet/MarkerCluster.Default.css" />
 <link rel="stylesheet" href="coop-sync.css" />
 <style>
   :root{
-    --bg:#14171c; --panel:#1b1f27; --panel2:#232936; --line:#2c333f;
-    --text:#e7ecf3; --muted:#93a0b4; --accent:#d9a441; --good:#5fb878;
+    --bg:#0f1217; --panel:#161a22; --panel2:#1e2430; --line:#2b3342;
+    --text:#eaeef5; --muted:#95a2b8; --accent:#d9a94e; --accent-hi:#f0cf88; --good:#5fb878;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
   #app{display:flex;height:100%}
 
-  #sidebar{width:330px;min-width:330px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;height:100%;transition:margin-left .25s}
-  #app.sb-collapsed #sidebar{margin-left:-330px}
-  .brand{padding:16px 18px 12px;border-bottom:1px solid var(--line)}
-  .brand h1{margin:0;font-size:18px;letter-spacing:.5px;color:var(--accent);font-weight:600}
-  .brand p{margin:3px 0 0;font-size:11px;color:var(--muted);letter-spacing:.3px}
-  .tools{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:9px}
+  #sidebar{width:336px;min-width:336px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;height:100%;transition:margin-left .25s}
+  #app.sb-collapsed #sidebar{margin-left:-336px}
+  .brand{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px 10px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(217,169,78,.09),transparent)}
+  .brand::after{content:"";position:absolute;left:14px;right:14px;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(217,169,78,.55),transparent);pointer-events:none}
+  .brand-main{min-width:0}
+  .brand h1{margin:0;font-family:"Palatino Linotype","Book Antiqua",Georgia,serif;font-size:18px;letter-spacing:1.4px;color:var(--accent-hi);font-weight:700;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+  .brand p{margin:2px 0 0;font-size:10.5px;color:var(--muted);letter-spacing:.35px}
+  .tools{padding:9px 14px 10px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
   .maptabs{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:3px;gap:3px}
-  .maptab{flex:1;text-align:center;padding:7px 4px;font-size:11px;white-space:nowrap;color:var(--muted);border-radius:5px;cursor:pointer;transition:.15s}
+  .maptab{flex:1;text-align:center;padding:6px 4px;font-size:11px;white-space:nowrap;color:var(--muted);border-radius:5px;cursor:pointer;transition:.15s}
   .maptab:hover{color:var(--text)}
-  .maptab.active{background:var(--accent);color:#1a1206;font-weight:600}
-  .search{display:flex;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:7px 10px}
-  .search input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:13px}
+  .maptab.active{background:var(--accent);color:#1a1206;font-weight:700}
+  .search{display:flex;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:6px 10px;transition:border-color .15s}
+  .search:focus-within{border-color:var(--accent)}
+  .search input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:12.5px}
   .search input::placeholder{color:var(--muted)}
   .row{display:flex;gap:8px}
-  .btn{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:7px;padding:7px;font-size:11.5px;cursor:pointer;transition:.15s;text-align:center}
+  .btn{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:7px;padding:6px 7px;font-size:11px;cursor:pointer;transition:.15s;text-align:center;white-space:nowrap}
   .btn:hover{border-color:var(--accent);color:var(--text)}
-  .btn.active{background:var(--accent);color:#1a1206;border-color:var(--accent);font-weight:600}
-  .cats{flex:1;overflow-y:auto;padding:8px 8px 24px}
-  .cats::-webkit-scrollbar{width:8px}
+  .btn.active{background:var(--accent);color:#1a1206;border-color:var(--accent);font-weight:700}
+  .cats{flex:1;min-height:0;overflow-y:auto;padding:6px 8px 20px}
+  .cats::-webkit-scrollbar{width:7px}
   .cats::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
-  .group-h{font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:10px 8px 5px}
-  .cat{display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:7px;cursor:pointer;user-select:none}
+  .cats::-webkit-scrollbar-thumb:hover{background:#3c475c}
+  .group-h{font-size:10px;text-transform:uppercase;letter-spacing:.9px;color:var(--accent);opacity:.85;padding:10px 8px 4px;font-weight:600}
+  .cat{display:flex;align-items:center;gap:9px;padding:6px 9px;border-radius:7px;cursor:pointer;user-select:none;transition:background .12s,opacity .15s}
   .cat:hover{background:var(--panel2)}
   .cat.off{opacity:.4}
-  .cat .ic{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-  .cat .nm{flex:1;font-size:13px}
-  .cat .ct{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .cat .ic{width:23px;height:23px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+  .cat .nm{flex:1;font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cat .ct{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0}
   .cat .ct b{color:var(--good)}
 
-  #map{flex:1;height:100%;background:#070809;cursor:grab}
+  #map{flex:1;height:100%;background:#070809;cursor:grab;--pin-scale:1}
   #map:active{cursor:grabbing}
   .leaflet-container{background:#070809}
-  #togglebar{position:absolute;top:12px;left:342px;z-index:1000;display:flex;gap:8px;transition:left .25s}
-  #app.sb-collapsed #togglebar{left:12px}
-  .iconbtn{background:rgba(27,31,39,.92);border:1px solid var(--line);color:var(--text);width:38px;height:38px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
-  .iconbtn:hover{border-color:var(--accent)}
+  #togglebar{position:absolute;top:12px;left:348px;z-index:1000;display:flex;align-items:center;flex-wrap:wrap;gap:7px;max-width:calc(100% - 370px);transition:left .25s}
+  #app.sb-collapsed #togglebar{left:12px;max-width:calc(100% - 24px)}
+  .iconbtn{background:rgba(22,26,34,.92);border:1px solid var(--line);color:var(--text);width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+  .iconbtn:hover{border-color:var(--accent);color:var(--accent-hi)}
 
-  .pin{display:flex;align-items:center;justify-content:center;border-radius:50%;border:2px solid #0d0f13;box-shadow:0 1px 4px rgba(0,0,0,.6);font-size:13px;transition:transform .1s}
-  .pin:hover{transform:scale(1.25);z-index:9999}
+  .pin{display:flex;align-items:center;justify-content:center;border-radius:50%;border:2px solid #0d0f13;box-shadow:0 1px 4px rgba(0,0,0,.65);font-size:13px;transform:scale(var(--pin-scale,1));transition:transform .15s ease}
+  .pin:hover{transform:scale(calc(var(--pin-scale,1) * 1.25));z-index:9999}
   .pin.done{filter:grayscale(1) brightness(.7);opacity:.7}
   .qpin{display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #0d0f13;box-shadow:0 1px 4px rgba(0,0,0,.6)}
   .qpin span{transform:rotate(45deg);color:#fff;font-size:11px;font-weight:700}
   .qpin.start{box-shadow:0 0 0 3px rgba(229,72,77,.45),0 1px 6px rgba(0,0,0,.7);z-index:9999}
   .qpin.start span{font-size:13px}
-  .region-label{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;color:#ecdfc2;font-size:13px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;text-shadow:0 1px 3px #000,0 0 7px #000,0 0 7px #000;pointer-events:none;opacity:var(--rl-op,.92);transition:opacity .25s}
-  .quest-row .dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+  .region-label{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;font-family:"Palatino Linotype","Book Antiqua",Georgia,serif;color:#efe2c4;font-size:13.5px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;text-shadow:0 1px 3px #000,0 0 8px #000,0 0 8px #000;pointer-events:none;opacity:var(--rl-op,.92);transition:opacity .25s}
+  .quest-row .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
   .quest-row.off{opacity:.45}
 
-  .leaflet-popup-content-wrapper{background:var(--panel);color:var(--text);border-radius:10px;border:1px solid var(--line)}
+  .leaflet-popup-content-wrapper{background:var(--panel);color:var(--text);border-radius:10px;border:1px solid var(--line);box-shadow:0 10px 28px rgba(0,0,0,.65)}
   .leaflet-popup-tip{background:var(--panel);border:1px solid var(--line)}
   .leaflet-popup-content{margin:12px 14px;font-size:13px;line-height:1.5}
   .pop-cat{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--accent);margin-bottom:3px}
-  .pop-t{font-size:15px;font-weight:600;margin-bottom:5px}
+  .pop-t{font-family:"Palatino Linotype","Book Antiqua",Georgia,serif;font-size:15.5px;font-weight:700;color:#f5ebd6;margin-bottom:5px}
   .pop-d{color:var(--muted);margin-bottom:9px}
   .pop-found{display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:7px 10px;font-size:12.5px}
   .pop-found.on{border-color:var(--good);color:var(--good)}
@@ -95,7 +100,8 @@
   .pop-wiki:hover{border-color:var(--accent);color:var(--accent)}
   .leaflet-popup-close-button{color:var(--muted)!important}
 
-  #coord{position:absolute;bottom:10px;right:10px;z-index:1000;background:rgba(27,31,39,.9);border:1px solid var(--line);color:var(--muted);font-size:11px;padding:5px 9px;border-radius:6px;font-variant-numeric:tabular-nums;pointer-events:none}
+  #coord{position:absolute;bottom:12px;right:12px;z-index:1000;background:rgba(22,26,34,.92);border:1px solid var(--line);color:#e8dcb9;font-size:11.5px;padding:5px 10px;border-radius:7px;pointer-events:none;backdrop-filter:blur(6px);box-shadow:0 4px 12px rgba(0,0,0,.45)}
+  #coord:empty{display:none}
 
   /* Completion dashboard */
   .dash{padding:10px 18px 12px;border-bottom:1px solid var(--line)}
@@ -129,7 +135,7 @@
   #questPanel{--qfs:1;position:absolute;top:12px;right:12px;width:360px;max-height:calc(100% - 24px);z-index:1100;background:var(--panel);border:1px solid var(--line);border-radius:10px;display:none;flex-direction:column;box-shadow:0 8px 28px rgba(0,0,0,.55)}
   #questPanel.open{display:flex}
   .qp-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
-  .qp-title{display:flex;align-items:center;gap:8px;font-size:calc(15px*var(--qfs));font-weight:600;flex:1;min-width:0}
+  .qp-title{display:flex;align-items:center;gap:8px;font-family:"Palatino Linotype","Book Antiqua",Georgia,serif;font-size:calc(15.5px*var(--qfs));font-weight:700;color:#f5ebd6;flex:1;min-width:0}
   .qp-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
   .qp-x{cursor:pointer;color:var(--muted);font-size:13px;padding:2px 7px;border-radius:5px}
   .qp-x:hover{color:var(--text);background:var(--panel2)}
@@ -177,8 +183,21 @@
 <div id="app">
   <aside id="sidebar">
     <div class="brand">
-      <h1>ELDEN RING</h1>
-      <p>Интерактивная карта · Seamless Co-op (.co2)</p>
+      <div class="brand-main">
+        <h1>ELDEN RING</h1>
+        <p>Интерактивная карта · Seamless Co-op (.co2)</p>
+      </div>
+      <div class="brand-menu-wrap">
+        <button type="button" class="gear-btn" id="settingsBtn" title="Настройки, экспорт и сброс">⚙</button>
+        <div class="gear-menu" id="settingsMenu">
+          <button type="button" class="gear-item" id="exportBtn">📤 Экспорт прогресса</button>
+          <button type="button" class="gear-item" id="importBtn">📥 Импорт прогресса</button>
+          <button type="button" class="gear-item" id="shareBtn">🔗 Ссылка на позицию</button>
+          <div class="gear-sep"></div>
+          <button type="button" class="gear-item danger" id="reset">🗑 Сбросить отметки</button>
+        </div>
+        <input type="file" id="importFile" accept="application/json" style="display:none">
+      </div>
     </div>
     <div class="coop-box" id="coopBox">
       <div class="coop-head">
@@ -200,7 +219,7 @@
     <div class="dash">
       <div class="dash-top"><span>Прогресс</span><span><b id="dashPct">0%</b></span></div>
       <div class="dash-bar"><div id="dashFill"></div></div>
-      <div class="dash-sub" id="dashSub">0 / 0 найдено</div>
+      <div class="dash-sub" id="dashSub">🔥 0/0 · 💀 0/0</div>
     </div>
     <div class="tools">
       <div class="maptabs" id="maptabs">
@@ -215,27 +234,35 @@
         </div>
         <div id="results" class="results"></div>
       </div>
-      <div class="row">
+    </div>
+    <div class="sb-tabs" id="sbTabs">
+      <button type="button" class="sb-tab active" data-tab="markers">📍 Метки</button>
+      <button type="button" class="sb-tab" data-tab="quests">📜 Квесты <span class="sb-tab-ct" id="sbQuestCt"></span></button>
+      <button type="button" class="sb-tab" data-tab="regions">🗺 Регионы</button>
+    </div>
+    <div class="sb-pane active" id="pane-markers">
+      <div class="pane-bar">
         <div class="btn" id="allOn">Показать все</div>
         <div class="btn" id="allOff">Скрыть все</div>
         <div class="btn" id="hideFound">Скрыть найденное</div>
       </div>
-      <div class="row">
-        <div class="btn" id="exportBtn">Экспорт</div>
-        <div class="btn" id="importBtn">Импорт</div>
-        <div class="btn" id="shareBtn">Ссылка</div>
-        <div class="btn" id="reset">Сброс</div>
-      </div>
-      <input type="file" id="importFile" accept="application/json" style="display:none">
+      <div class="cats" id="cats"></div>
     </div>
-    <div class="cats" id="cats"></div>
+    <div class="sb-pane" id="pane-quests">
+      <div class="cats" id="questCats"></div>
+    </div>
+    <div class="sb-pane" id="pane-regions">
+      <div class="reg-active-strip" id="regActiveStrip"></div>
+      <div class="cats reg-list" id="regionPanel"></div>
+    </div>
   </aside>
 
   <div id="map"></div>
   <div id="togglebar">
-    <button class="iconbtn" id="sbToggle" title="Toggle sidebar">☰</button>
+    <button class="iconbtn" id="sbToggle" title="Скрыть/показать панель">☰</button>
+    <div id="mapFilterChips" class="map-chips"></div>
   </div>
-  <div id="coord">px: 0, py: 0</div>
+  <div id="coord"></div>
   <div id="questPanel"></div>
   <div id="coopToasts"></div>
 </div>
@@ -298,6 +325,7 @@ function switchBase(base){
   if (base === activeBase || !baseLayers[base]) return;
   map.removeLayer(baseLayers[activeBase]);
   activeBase = base;
+  activeRegion = null;
   buildMasterMarkers(base);                 // lazily build this map's markers on first visit
   baseLayers[base].addTo(map);
   baseLayers[base].bringToBack();
@@ -320,11 +348,48 @@ const catState = {};
 const markerRefs = [];
 const catById = {};
 let hideFound = false;
+let npcMode = "dynamic";
+let activeRegion = null;
+let activeSbTab = "markers";
+let questFilter = "all";
+const QL = window.QUESTLINES || [];
+const questState = {};       // id -> drawn on map
+const questLayers = {};
+const stepMarkers = {};      // "id#n" -> marker
+let panelQuest = null;
 CATEGORIES.forEach(c => catById[c.id] = c);
 
 const PREFS_KEY = "er-map-prefs";
 const SAVED_PREFS = (function(){ try{ return JSON.parse(localStorage.getItem(PREFS_KEY) || "null"); }catch(e){ return null; } })();
-function savePrefs(){ try{ localStorage.setItem(PREFS_KEY, JSON.stringify({ cats:catState, base:activeBase, hf:hideFound })); }catch(e){} }
+function savePrefs(){ try{ localStorage.setItem(PREFS_KEY, JSON.stringify({ cats:catState, base:activeBase, hf:hideFound, npcMode, sbTab:activeSbTab, qf:questFilter })); }catch(e){} }
+function syncNpcModeBtn(){
+  const btn = document.getElementById("npcModeBtn");
+  if(!btn) return;
+  const isAll = npcMode === "all";
+  btn.textContent = isAll ? "Все" : "Живые";
+  btn.classList.toggle("all", isAll);
+}
+function isDynamicNpcMode(){
+  return npcMode === "dynamic" && !!(window.COOP_AUTO && window.COOP_AUTO.hasDynamicNpcs && window.COOP_AUTO.hasDynamicNpcs());
+}
+function switchSbTab(tab){
+  if(!["markers", "quests", "regions"].includes(tab)) tab = "markers";
+  activeSbTab = tab;
+  document.querySelectorAll(".sb-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+  document.querySelectorAll(".sb-pane").forEach(p => p.classList.toggle("active", p.id === "pane-" + tab));
+  savePrefs();
+}
+document.querySelectorAll(".sb-tab").forEach(b => b.onclick = () => switchSbTab(b.dataset.tab));
+
+const settingsBtnEl = document.getElementById("settingsBtn");
+const settingsMenuEl = document.getElementById("settingsMenu");
+function closeSettingsMenu(){ if(settingsMenuEl) settingsMenuEl.classList.remove("open"); }
+if(settingsBtnEl && settingsMenuEl){
+  settingsBtnEl.onclick = (e) => { e.stopPropagation(); settingsMenuEl.classList.toggle("open"); };
+  document.addEventListener("click", (e) => {
+    if(!settingsMenuEl.contains(e.target) && e.target !== settingsBtnEl) closeSettingsMenu();
+  });
+}
 
 /* ---- Build category list ---- */
 const catsEl = document.getElementById("cats");
@@ -394,6 +459,12 @@ function itemMeta(d, catId){
   }
   return { iconHtml, statHtml, sumHtml };
 }
+const COLLECTIBLE_CATS = { weapon:1, armor:1, talisman:1, spell:1, ash:1, spirit:1, tear:1, golden:1, larval:1, memory:1, crystal:1, greatrune:1, whetblade:1, scadutree:1, revered:1 };
+const NPC_STATUS_HTML = {
+  alive: '<span class="pop-npc-status alive">🕊 Жив</span>',
+  hostile: '<span class="pop-npc-status hostile">⚔ Враждебен</span>',
+  dead: '<span class="pop-npc-status dead">💀 Погиб</span>',
+};
 function popupHtml(d, cat){
   const autoOn = !!(window.COOP_AUTO && window.COOP_AUTO.isMarkerFound(d.id));
   const on = isMarkerFound(d.id);
@@ -401,29 +472,48 @@ function popupHtml(d, cat){
   const wikiName = d.en || d.name;
   const wiki = `https://eldenring.wiki.fextralife.com/${encodeURIComponent(wikiName).replace(/%20/g,'+')}`;
   let bossHtml = "";
-  if(cat.id==='boss'){ const bi = bossInfo(d.en || d.name); if(bi){
-    if(bi.deals && bi.deals.length) bossHtml += `<div class="pop-stat pop-deals"><b>Урон</b> ${dmgChips(bi.deals)}</div>`;
-    if(bi.weak && bi.weak.length) bossHtml += `<div class="pop-stat pop-weak"><b>Уязвимость</b> ${dmgChips(bi.weak)}</div>`;
-    if(bi.resist && bi.resist.length) bossHtml += `<div class="pop-stat pop-resist"><b>Сопротивление</b> ${dmgChips(bi.resist)}</div>`;
-    if(bi.note) bossHtml += `<div class="pop-sum">🛡 ${bi.note}</div>`;
-  } }
+  if(cat.id==='boss'){
+    const bi = bossInfo(d.en || d.name);
+    const drops = (window.BOSS_DROPS_BY_ID && window.BOSS_DROPS_BY_ID[d.id]) || (bi && bi.drops);
+    if(drops) bossHtml += `<div class="pop-stat pop-drops">🎁 <b>Награда:</b> ${drops}</div>`;
+    if(bi){
+      if(bi.deals && bi.deals.length) bossHtml += `<div class="pop-stat pop-deals"><b>Урон</b> ${dmgChips(bi.deals)}</div>`;
+      if(bi.weak && bi.weak.length) bossHtml += `<div class="pop-stat pop-weak"><b>Уязвимость</b> ${dmgChips(bi.weak)}</div>`;
+      if(bi.resist && bi.resist.length) bossHtml += `<div class="pop-stat pop-resist"><b>Сопротивление</b> ${dmgChips(bi.resist)}</div>`;
+      if(bi.note) bossHtml += `<div class="pop-sum">🛡 ${bi.note}</div>`;
+    }
+  }
+  const npcInfo = (cat.id==='npc' && window.COOP_AUTO && window.COOP_AUTO.getActiveNpc) ? window.COOP_AUTO.getActiveNpc(d.id) : null;
+  const npcBadge = npcInfo ? (NPC_STATUS_HTML[npcInfo.status] || "") : "";
+  const npcStageHtml = npcInfo ? `<div class="pop-stat pop-npc-stage">🧭 <b>Текущий этап:</b> ${npcInfo.stage}</div>` : "";
+  const questBtnHtml = (npcInfo && npcInfo.quest_id) ? `<button type="button" class="pop-quest-btn" data-qid="${npcInfo.quest_id}">📜 Квест</button>` : "";
   const condHtml = d.cond ? `<div class="pop-stat pop-cond">🌙 Условие появления: <b>${d.cond}</b></div>` : "";
   const fallbackDesc = (cat.id === 'boss' && !m.statHtml && d.desc) ? `<div class="pop-stat">🪙 <b>${d.desc}</b></div>` : "";
+  const descHtml = (d.desc && cat.id !== 'boss')
+    ? (COLLECTIBLE_CATS[cat.id] ? `<div class="pop-d pop-hint">📍 <b>Как получить:</b> ${d.desc}</div>` : `<div class="pop-d">${d.desc}</div>`)
+    : "";
   return `
     <div class="pop-head">${m.iconHtml}
       <div class="pop-head-t">
-        <div class="pop-cat">${cat.icon} ${cat.name}${autoOn ? '<span class="auto-badge">⚡ .co2</span>' : ''}</div>
+        <div class="pop-cat">${cat.icon} ${cat.name}${autoOn ? '<span class="auto-badge">⚡ .co2</span>' : ''}${npcBadge}</div>
         <div class="pop-t">${d.name}</div>
       </div>
     </div>
-    ${m.statHtml}${fallbackDesc}${condHtml}${m.sumHtml}${bossHtml}
-    ${(d.desc && cat.id !== 'boss') ? `<div class="pop-d">${d.desc}</div>` : ""}
+    ${m.statHtml}${fallbackDesc}${condHtml}${npcStageHtml}${m.sumHtml}${bossHtml}
+    ${descHtml}
     <div class="pop-actions">
       <div class="pop-found ${on?'on':''}" data-id="${d.id}"><span>${on?'✓':'○'}</span><span>${autoOn ? 'Открыто в .co2' : (on?'Найдено':'Отметить найденным')}</span></div>
+      ${questBtnHtml}
       <a class="pop-wiki" href="${wiki}" target="_blank" rel="noopener">Wiki ↗</a>
     </div>`;
 }
 function bindPopup(d, cat, m){
+  const qbtn = document.querySelector('.pop-quest-btn[data-qid]');
+  if(qbtn) qbtn.onclick = () => {
+    const qid = qbtn.dataset.qid;
+    const q = (typeof QL !== "undefined") ? QL.find(x => x.id === qid) : null;
+    if(q){ openQuestPanel(q); m.closePopup(); }
+  };
   const el = document.querySelector(`.pop-found[data-id="${d.id}"]`);
   if(!el) return;
   el.onclick = () => {
@@ -465,8 +555,21 @@ Object.keys(groups).forEach(gName => {
   groups[gName].forEach(cat => {
     catState[cat.id] = true;
     const row = document.createElement("div"); row.className="cat"; row.dataset.cat=cat.id;
+    const pill = cat.id === "npc"
+      ? `<button type="button" class="npc-mode-pill" id="npcModeBtn" title="Живые: только встреченные НПС в текущей локации. Все: все 312 позиций на карте.">Живые</button>`
+      : "";
     row.innerHTML = `<div class="ic" style="background:${cat.color}">${cat.icon}</div>
-      <div class="nm">${cat.name}</div><div class="ct" id="ct-${cat.id}"></div>`;
+      <div class="nm">${cat.name}</div>${pill}<div class="ct" id="ct-${cat.id}"></div>`;
+    if (cat.id === "npc") {
+      const btn = row.querySelector("#npcModeBtn");
+      if (btn) btn.onclick = (e) => {
+        e.stopPropagation();
+        npcMode = (npcMode === "dynamic" ? "all" : "dynamic");
+        syncNpcModeBtn();
+        refreshCounts();
+        rebuildCluster();
+      };
+    }
     row.onclick = () => toggleCat(cat.id);
     gEl.appendChild(row);
   });
@@ -475,8 +578,104 @@ Object.keys(groups).forEach(gName => {
 
 /* ---- Cluster membership = category on + master matches active base ---- */
 const searchEl = document.getElementById("search");
+function renderMapChips(){
+  const wrap = document.getElementById("mapFilterChips");
+  if(!wrap) return;
+  const chips = [];
+  if(activeRegion){
+    chips.push({ key:"reg", label:`🗺 ${activeRegion}` });
+  }
+  if(hideFound){
+    chips.push({ key:"hf", label:"👁 Скрыть найденное" });
+  }
+  const shownQuests = (typeof QL !== "undefined" && typeof questState !== "undefined")
+    ? QL.filter(q => questState[q.id]).length
+    : 0;
+  if(shownQuests > 0){
+    chips.push({ key:"quests", label:`📜 Квестов: ${shownQuests}` });
+  }
+  wrap.innerHTML = chips.map(c =>
+    `<button type="button" class="map-chip" data-chip="${c.key}" title="Сбросить фильтр">${c.label} <span>✕</span></button>`
+  ).join("");
+  wrap.querySelectorAll(".map-chip").forEach(btn => {
+    btn.onclick = () => {
+      const k = btn.dataset.chip;
+      if(k === "reg") selectRegion(null);
+      else if(k === "hf") setHideFound(false);
+      else if(k === "quests" && typeof hideAllQuests === "function") hideAllQuests();
+    };
+  });
+}
+function setHideFound(on){
+  hideFound = !!on;
+  const btn = document.getElementById("hideFound");
+  if(btn) btn.classList.toggle("active", hideFound);
+  rebuildCluster();
+  if (typeof renderActiveQuests === "function") renderActiveQuests();
+  if (typeof refreshQuestList === "function") refreshQuestList();
+  if (typeof panelQuest !== "undefined" && panelQuest && typeof fillPanel === "function") fillPanel(panelQuest);
+  renderMapChips();
+}
+
+function selectRegion(reg){
+  activeRegion = (reg && activeRegion !== reg) ? reg : null;
+  refreshCounts();
+  rebuildCluster();
+  if(activeRegion){
+    const pts = MARKERS.filter(m => m.master === activeBase && m.reg === activeRegion && m.cat !== "region");
+    if(pts.length){
+      map.fitBounds(L.latLngBounds(pts.map(m => xy(m.px, m.py))), { padding: [45, 45], maxZoom: 5 });
+    }
+  }
+}
+function renderRegionPanel(){
+  const rp = document.getElementById("regionPanel");
+  const strip = document.getElementById("regActiveStrip");
+  if(strip){
+    strip.innerHTML = activeRegion
+      ? `<span>Фильтр: <b>${activeRegion}</b></span><button type="button" class="reg-chip" id="regClearBtn" title="Сбросить фильтр региона">Сбросить ✕</button>`
+      : "";
+    strip.style.display = activeRegion ? "flex" : "none";
+    const clr = document.getElementById("regClearBtn");
+    if(clr) clr.onclick = (e) => { e.stopPropagation(); selectRegion(null); };
+  }
+  if(!rp) return;
+  const order = (typeof REGION_ORDER !== "undefined" && REGION_ORDER[activeBase]) ? REGION_ORDER[activeBase] : [];
+  const baseMarkers = MARKERS.filter(m => m.master === activeBase && (m.cat === "grace" || m.cat === "boss"));
+  const byReg = {};
+  baseMarkers.forEach(m => { if(m.reg) (byReg[m.reg] ||= []).push(m); });
+  rp.innerHTML = order.map(reg => {
+    const arr = byReg[reg] || [];
+    if(!arr.length) return "";
+    const gr = arr.filter(m => m.cat === "grace");
+    const bs = arr.filter(m => m.cat === "boss");
+    const gDone = gr.filter(m => isMarkerFound(m.id)).length;
+    const bDone = bs.filter(m => isMarkerFound(m.id)).length;
+    const t = gr.length + bs.length;
+    const d = gDone + bDone;
+    const pct = t ? Math.round(d / t * 100) : 0;
+    const cls = ["reg-row", reg === activeRegion ? "active" : "", (t > 0 && d === t) ? "done" : ""].filter(Boolean).join(" ");
+    return `<div class="${cls}" data-reg="${reg}">` +
+      `<div class="reg-row-top"><span class="reg-nm">${reg}</span><span class="reg-pct">${pct}%</span></div>` +
+      `<div class="reg-bar"><div style="width:${pct}%"></div></div>` +
+      `<div class="reg-meta">🔥 ${gDone}/${gr.length} · 💀 ${bDone}/${bs.length}</div>` +
+      `</div>`;
+  }).join("");
+  rp.querySelectorAll(".reg-row").forEach(el => {
+    el.onclick = () => selectRegion(el.dataset.reg);
+  });
+}
+
 function rebuildCluster(){
-  const active = markerRefs.filter(r => !r.isRegion && catState[r.cat.id] && r.master === activeBase && !(hideFound && isMarkerFound(r.data.id)));
+  const dynNpc = isDynamicNpcMode();
+  const active = markerRefs.filter(r =>
+    !r.isRegion &&
+    catState[r.cat.id] &&
+    r.master === activeBase &&
+    (!activeRegion || r.data.reg === activeRegion) &&
+    !(hideFound && isMarkerFound(r.data.id)) &&
+    !(dynNpc && r.cat.id === "npc" && !window.COOP_AUTO.getActiveNpc(r.data.id))
+  );
   const clustered = active.filter(r => !UNCLUSTERED_CATS[r.cat.id]).map(r => r.marker);
   const direct = active.filter(r => UNCLUSTERED_CATS[r.cat.id]).map(r => r.marker);
   cluster.clearLayers();
@@ -484,6 +683,7 @@ function rebuildCluster(){
   directLayer.clearLayers();
   direct.forEach(mk => directLayer.addLayer(mk));
   rebuildRegions();
+  renderMapChips();
   savePrefs();
 }
 function rebuildRegions(){
@@ -491,33 +691,47 @@ function rebuildRegions(){
   if(!catState["region"]) return;
   markerRefs.forEach(r => { if(r.isRegion && r.master === activeBase) regionLayer.addLayer(r.marker); });
 }
-// Region labels fade in as you zoom past the overview, keeping the wide view clean.
-function updateRegionOpacity(){
+// Region labels fade in & non-clustered pins scale smoothly by zoom level.
+function updateZoomVisuals(){
   const z = map.getZoom();
   const op = (Math.max(0, Math.min(1, (z - 2.4) / 1.0)) * 0.92).toFixed(2);
-  document.getElementById("map").style.setProperty("--rl-op", op);
+  const pinScale = z <= 1.5 ? 0.65 : (z <= 2.5 ? 0.78 : (z <= 3.5 ? 0.90 : (z <= 5.0 ? 1.00 : 1.10)));
+  const mapEl = document.getElementById("map");
+  mapEl.style.setProperty("--rl-op", op);
+  mapEl.style.setProperty("--pin-scale", String(pinScale));
 }
-map.on("zoomend", updateRegionOpacity);
-updateRegionOpacity();
+map.on("zoomend", updateZoomVisuals);
+updateZoomVisuals();
 function toggleCat(id){
   catState[id] = !catState[id];
   document.querySelector(`.cat[data-cat="${id}"]`).classList.toggle("off", !catState[id]);
   rebuildCluster();
 }
 function refreshCounts(){
+  const dynNpc = isDynamicNpcMode();
   CATEGORIES.forEach(cat => {
-    const inBase = MARKERS.filter(m => m.cat===cat.id && m.master===activeBase);
-    const total = inBase.length, done = inBase.filter(m => isMarkerFound(m.id)).length;
+    const inBase = MARKERS.filter(m => m.cat===cat.id && m.master===activeBase && (!activeRegion || m.reg===activeRegion));
+    const total = inBase.length;
+    const done = (cat.id === "npc" && dynNpc)
+      ? inBase.filter(m => !!window.COOP_AUTO.getActiveNpc(m.id)).length
+      : inBase.filter(m => isMarkerFound(m.id)).length;
     const el = document.getElementById("ct-"+cat.id);
     if(el) el.innerHTML = total ? `<b>${done}</b>/${total}` : "";
     const row = document.querySelector(`.cat[data-cat="${cat.id}"]`);
     if(row) row.style.display = total ? "" : "none";
   });
-  const coll = MARKERS.filter(m => m.master===activeBase && m.cat!=='region');  // collectibles only
-  const t = coll.length, d = coll.filter(m => isMarkerFound(m.id)).length, p = t ? Math.round(d/t*100) : 0;
+  const prog = MARKERS.filter(m => m.master===activeBase && (m.cat==='grace' || m.cat==='boss') && (!activeRegion || m.reg===activeRegion));
+  const gr = prog.filter(m => m.cat==='grace');
+  const bs = prog.filter(m => m.cat==='boss');
+  const gDone = gr.filter(m => isMarkerFound(m.id)).length;
+  const bDone = bs.filter(m => isMarkerFound(m.id)).length;
+  const t = prog.length, d = gDone + bDone, p = t ? Math.round(d/t*100) : 0;
+  const dashTitle = document.querySelector(".dash-top span:first-child");
+  if(dashTitle) dashTitle.textContent = activeRegion ? `Прогресс · ${activeRegion}` : "Прогресс";
   document.getElementById("dashFill").style.width = p + "%";
   document.getElementById("dashPct").textContent = p + "%";
-  document.getElementById("dashSub").textContent = `${d} / ${t} найдено`;
+  document.getElementById("dashSub").textContent = `🔥 ${gDone}/${gr.length} · 💀 ${bDone}/${bs.length}`;
+  renderRegionPanel();
 }
 refreshCounts();
 rebuildCluster();
@@ -533,6 +747,7 @@ function setAll(on){
 document.getElementById("allOn").onclick  = () => setAll(true);
 document.getElementById("allOff").onclick = () => setAll(false);
 document.getElementById("reset").onclick = () => {
+  closeSettingsMenu();
   if(!confirm("Сбросить все ручные отметки «найдено»?")) return;
   found = {}; saveFound();
   markerRefs.forEach(r => { if (!r.isRegion) r.marker.setIcon(divIcon(r.cat, isMarkerFound(r.data.id), r.data)); });
@@ -545,19 +760,19 @@ document.getElementById("sbToggle").onclick = () => {
 if (window.matchMedia("(max-width:640px)").matches) document.getElementById("app").classList.add("sb-collapsed");
 
 /* ---- Hide found ---- */
-document.getElementById("hideFound").onclick = (e) => {
-  hideFound = !hideFound;
-  e.currentTarget.classList.toggle("active", hideFound);
-  rebuildCluster();
-};
+document.getElementById("hideFound").onclick = () => setHideFound(!hideFound);
 
 /* ---- Backup & sharing ---- */
 document.getElementById("exportBtn").onclick = () => {
+  closeSettingsMenu();
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([JSON.stringify(found)], { type:"application/json" }));
   a.download = "elden-ring-progress.json"; a.click(); URL.revokeObjectURL(a.href);
 };
-document.getElementById("importBtn").onclick = () => document.getElementById("importFile").click();
+document.getElementById("importBtn").onclick = () => {
+  closeSettingsMenu();
+  document.getElementById("importFile").click();
+};
 document.getElementById("importFile").onchange = (e) => {
   const f = e.target.files[0]; if(!f) return;
   const rd = new FileReader();
@@ -580,9 +795,9 @@ document.getElementById("shareBtn").onclick = async () => {
   const [px,py] = fromLatLng(map.getCenter());
   location.hash = `${activeBase}/${px}/${py}/${map.getZoom().toFixed(2)}`;
   const btn = document.getElementById("shareBtn");
-  try{ await navigator.clipboard.writeText(location.href); btn.textContent = "Скопировано!"; }
-  catch(e){ btn.textContent = "В URL"; }
-  setTimeout(() => btn.textContent = "Ссылка", 1400);
+  try{ await navigator.clipboard.writeText(location.href); btn.textContent = "✓ Ссылка скопирована"; }
+  catch(e){ btn.textContent = "🔗 Ссылка в URL"; }
+  setTimeout(() => btn.textContent = "🔗 Ссылка на позицию", 1400);
 };
 
 /* ---- Restore saved filters + shared view ---- */
@@ -591,8 +806,13 @@ function restoreState(){
   if(p){
     if(p.cats) CATEGORIES.forEach(c => { if(c.id in p.cats){ catState[c.id]=p.cats[c.id]; const row=document.querySelector(`.cat[data-cat="${c.id}"]`); if(row) row.classList.toggle("off", !catState[c.id]); } });
     if(p.hf){ hideFound=true; document.getElementById("hideFound").classList.add("active"); }
+    if(p.npcMode === "all" || p.npcMode === "dynamic") npcMode = p.npcMode;
+    if(["markers","quests","regions"].includes(p.sbTab)) activeSbTab = p.sbTab;
+    if(["all","active","todo","done"].includes(p.qf)) questFilter = p.qf;
     if(p.base && p.base!==activeBase && baseLayers[p.base]) switchBase(p.base);
   }
+  syncNpcModeBtn();
+  switchSbTab(activeSbTab);
   const h = location.hash.replace(/^#/,"").split("/");
   if(h.length===4 && baseLayers[h[0]]){
     if(h[0]!==activeBase) switchBase(h[0]);
@@ -600,6 +820,8 @@ function restoreState(){
     if(isFinite(px)&&isFinite(py)&&isFinite(z)) map.setView(xy(px,py), z, {animate:false});
   }
   refreshCounts(); rebuildCluster();
+  if(typeof refreshQuestList === "function") refreshQuestList();
+  if(typeof renderActiveQuests === "function") renderActiveQuests();
 }
 
 /* ---- Search: live results dropdown across all 3 maps + fly-to ---- */
@@ -624,6 +846,7 @@ function renderResults(){
     item.onmousedown = (e) => {            // mousedown fires before the input's blur
       e.preventDefault();
       if(d.master !== activeBase) switchBase(d.master);
+      if(activeRegion && d.reg !== activeRegion){ activeRegion = null; refreshCounts(); rebuildCluster(); }
       if(!catState[cat.id]){ catState[cat.id]=true; const row=document.querySelector(`.cat[data-cat="${cat.id}"]`); if(row) row.classList.remove("off"); rebuildCluster(); }
       resultsEl.style.display="none"; searchEl.value=d.name;
       const r = markerRefs.find(x => x.data.id === d.id);
@@ -642,26 +865,28 @@ searchEl.oninput = renderResults;
 searchEl.onfocus = renderResults;
 searchEl.onblur  = () => setTimeout(() => { resultsEl.style.display="none"; }, 150);
 
-/* ---- Coordinate readout (master pixels, for placing new pins) ---- */
+/* ---- Hover region badge (nearest grace region on active map) ---- */
+const GRACES_BY_BASE = { M00: [], M01: [], M10: [] };
+MARKERS.forEach(m => { if(m.cat === "grace" && m.reg && GRACES_BY_BASE[m.master]) GRACES_BY_BASE[m.master].push(m); });
+const coordEl = document.getElementById("coord");
 map.on("mousemove", e => {
-  const [px,py] = fromLatLng(e.latlng);
-  document.getElementById("coord").textContent = `px: ${px}, py: ${py}`;
+  const [px, py] = fromLatLng(e.latlng);
+  if(px < 0 || py < 0 || px > CONFIG.imgSize || py > CONFIG.imgSize){ coordEl.textContent = ""; return; }
+  const grs = GRACES_BY_BASE[activeBase] || [];
+  let best = null, bestD2 = Infinity;
+  for(let i = 0; i < grs.length; i++){
+    const dx = px - grs[i].px, dy = py - grs[i].py, d2 = dx*dx + dy*dy;
+    if(d2 < bestD2){ bestD2 = d2; best = grs[i]; }
+  }
+  coordEl.textContent = (best && bestD2 <= 1600 * 1600) ? `🗺 ${best.reg}` : "";
 });
-map.on("click", e => {
-  const [px,py] = fromLatLng(e.latlng);
-  console.log(`{ id:"new", cat:"grace", name:"New", master:"${activeBase}", px:${px}, py:${py}, desc:"" },`);
-});
+map.on("mouseout", () => { coordEl.textContent = ""; });
 
 /* ============================================================
    QUESTLINES — ordered, numbered step pins + connecting path.
    Each questline toggles independently; steps show on the layer
    (overworld/underground) they belong to.
    ============================================================ */
-const QL = window.QUESTLINES || [];
-const questState = {};       // id -> drawn on map
-const questLayers = {};
-const stepMarkers = {};      // "id#n" -> marker
-let panelQuest = null;
 
 /* ---- quest progress (localStorage) ---- */
 const QSAVE_KEY = "er-map-quests-v1";
@@ -698,15 +923,20 @@ function stepPopup(q, s){
     `<div class="pop-found ${done?'on':''}" data-qd="${q.id}#${s.n}"><span>${done?'✓':'○'}</span><span>${done?'Шаг выполнен':'Отметить выполненным'}</span></div>`;
 }
 function renderQuest(q){
-  if (questLayers[q.id]) { map.removeLayer(questLayers[q.id]); delete questLayers[q.id]; }
+  if (questLayers[q.id]) {
+    map.removeLayer(questLayers[q.id]);
+    delete questLayers[q.id];
+  }
+  q.steps.forEach(s => { delete stepMarkers[q.id + '#' + s.n]; });
   if (!questState[q.id]) return;
   const steps = q.steps.filter(s => s.master === activeBase);
+  const visSteps = hideFound ? steps.filter(s => !isDone(q.id, s.n)) : steps;
   const lg = L.layerGroup();
-  if (steps.length > 1){
-    L.polyline(steps.map(s => xy(s.px, s.py)), { color:q.color, weight:2.5, opacity:.6, dashArray:"5,6" }).addTo(lg);
+  if (visSteps.length > 1){
+    L.polyline(visSteps.map(s => xy(s.px, s.py)), { color:q.color, weight:2.5, opacity:.6, dashArray:"5,6" }).addTo(lg);
   }
   const cur = currentN(q);
-  steps.forEach(s => {
+  visSteps.forEach(s => {
     const st = { start:s.n===1, done:isDone(q.id,s.n), current:s.n===cur, warn:!!s.warn };
     const mk = L.marker(xy(s.px, s.py), { icon: qIcon(q.color, s.n, st), title:`${s.n}. ${s.title}`, zIndexOffset: st.current?3000:(st.start?2000:1000) });
     mk.bindPopup(() => stepPopup(q, s), { minWidth:230 });
@@ -733,9 +963,23 @@ function toggleStepDone(q, n){
   }
   saveQuests();
   renderQuest(q); updateQuestRow(q);
+  if (typeof refreshQuestList === "function") refreshQuestList();
   if(panelQuest && panelQuest.id===q.id) fillPanel(q);
 }
-function renderActiveQuests(){ QL.forEach(q => { if (questState[q.id]) renderQuest(q); }); }
+function renderActiveQuests(){
+  QL.forEach(q => renderQuest(q));
+  renderMapChips();
+}
+function hideAllQuests(){
+  QL.forEach(q => {
+    questState[q.id] = false;
+    delete qsave.shown[q.id];
+    updateQuestRow(q);
+  });
+  saveQuests();
+  closeQuestPanel();
+  renderActiveQuests();
+}
 
 /* ---- quest detail panel ---- */
 const qPanel = document.getElementById("questPanel");
@@ -749,6 +993,7 @@ function openQuestPanel(q){
   qPanel.style.setProperty("--qfs", qFont);
   qPanel.style.width = (!window.matchMedia("(max-width:640px)").matches && qpW) ? qpW+"px" : "";
   updateQuestRow(q); fillPanel(q); qPanel.classList.add("open");
+  renderMapChips();
   if (window.matchMedia("(max-width:640px)").matches) document.getElementById("app").classList.add("sb-collapsed");  // give the panel + map room on phones
 }
 function closeQuestPanel(){ qPanel.classList.remove("open"); panelQuest=null; }
@@ -757,7 +1002,12 @@ function fillPanel(q){
   const _scrollTop = (_lastPanelId === q.id && _stPrev) ? _stPrev.scrollTop : 0;   // keep scroll on same-quest re-render; reset for a new quest
   _lastPanelId = q.id;
   const {t,d} = qProgress(q), pct = t ? Math.round(d/t*100) : 0, cur = currentN(q);
-  const rows = q.steps.map(s => {
+  const visibleSteps = hideFound ? q.steps.filter(s => !isDone(q.id, s.n)) : q.steps;
+  const hiddenCnt = q.steps.length - visibleSteps.length;
+  const hiddenNote = (hideFound && hiddenCnt > 0)
+    ? `<div class="qp-hidden-note">${visibleSteps.length ? `Скрыто выполненных шагов: <b>${hiddenCnt}</b> (фильтр «Скрыть найденное»)` : "✓ Все шаги квеста выполнены"}</div>`
+    : "";
+  const rows = visibleSteps.map(s => {
     const done = isDone(q.id,s.n), isCur = s.n===cur, other = s.master!==activeBase;
     const reason = window.COOP_AUTO ? window.COOP_AUTO.getStepReason(q.id, s.n) : null;
     const badge = (done && reason)
@@ -775,12 +1025,21 @@ function fillPanel(q){
   const npcSt = window.COOP_AUTO ? window.COOP_AUTO.getNpcStatus(q.id) : 'unknown';
   const npcBadge = npcSt==='hostile' ? '<span class="npc-badge hostile" title="Можно искупить грех в Храме Клятв">⚔ Враждебен</span>' : (npcSt==='dead' ? '<span class="npc-badge dead">💀 Погиб</span>' : '');
   qPanel.innerHTML =
-    `<div class="qp-resize" id="qpResize"></div><div class="qp-head"><div class="qp-title"><span class="qp-dot" style="background:${q.color}"></span>${q.name}${npcBadge}</div><div class="qp-tools"><div class="qp-fs" id="qpFsDn" title="Уменьшить шрифт">A−</div><div class="qp-fs" id="qpFsUp" title="Увеличить шрифт">A+</div><div class="qp-x" id="qpX">✕</div></div></div>`+
+    `<div class="qp-resize" id="qpResize"></div><div class="qp-head"><div class="qp-title"><span class="qp-dot" style="background:${q.color}"></span>${q.name}${npcBadge}</div><div class="qp-tools"><div class="qp-unpin" id="qpHideMap" title="Скрыть маркеры этого квеста с карты и закрыть панель">Снять с карты</div><div class="qp-fs" id="qpFsDn" title="Уменьшить шрифт">A−</div><div class="qp-fs" id="qpFsUp" title="Увеличить шрифт">A+</div><div class="qp-x" id="qpX">✕</div></div></div>`+
     `<div class="qp-prog"><div class="qp-prog-top"><span>${d} / ${t} шагов выполнено</span><b>${pct}%</b></div><div class="dash-bar"><div style="width:${pct}%"></div></div></div>`+
     `<div class="qp-steps">`+
       (q.overview?`<div class="qp-notes"><div class="qp-notes-h">Обзор квеста</div>${q.overview}${q.prereq?`<div class="qp-prereq">⚑ ${q.prereq}</div>`:''}</div>`:'')+
-      `${rows}</div>`;
+      `${hiddenNote}${rows}</div>`;
   document.getElementById("qpX").onclick = closeQuestPanel;
+  document.getElementById("qpHideMap").onclick = () => {
+    questState[q.id] = false;
+    delete qsave.shown[q.id];
+    saveQuests();
+    renderQuest(q);
+    updateQuestRow(q);
+    renderMapChips();
+    closeQuestPanel();
+  };
   document.getElementById("qpFsUp").onclick = e => { e.stopPropagation(); setQuestFont(qFont+0.1); };
   document.getElementById("qpFsDn").onclick = e => { e.stopPropagation(); setQuestFont(qFont-0.1); };
   const qpr = document.getElementById("qpResize");
@@ -824,31 +1083,99 @@ function toggleQuest(id){
   questState[id] = !questState[id];
   if(questState[id]) qsave.shown[id]=1; else delete qsave.shown[id];
   saveQuests();
-  updateQuestRow(q); renderQuest(q);
+  updateQuestRow(q); renderQuest(q); renderMapChips();
   if(questState[id]) openQuestPanel(q); else if(panelQuest && panelQuest.id===id) closeQuestPanel();
 }
+
+function refreshQuestList(){
+  const counts = { all: QL.length, active: 0, todo: 0, done: 0 };
+  const phaseVis = {};
+  QL.forEach(q => {
+    const { t, d } = qProgress(q);
+    const status = (t > 0 && d === t) ? "done" : (d > 0 ? "active" : "todo");
+    counts[status]++;
+    const show = (questFilter === "all" || status === questFilter) && !(hideFound && questFilter === "all" && status === "done");
+    const row = document.querySelector(`.quest-row[data-q="${q.id}"]`);
+    if(row) row.style.display = show ? "" : "none";
+    const ph = String(q.phase || "");
+    if(show) phaseVis[ph] = (phaseVis[ph] || 0) + 1;
+  });
+  document.querySelectorAll(".qphase-h").forEach(h => {
+    h.style.display = phaseVis[h.dataset.qphase] ? "" : "none";
+  });
+  ["all", "active", "todo", "done"].forEach(k => {
+    const ce = document.getElementById("qfc-" + k);
+    if(ce) ce.textContent = String(counts[k]);
+  });
+  document.querySelectorAll(".qfilter-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.qf === questFilter);
+  });
+}
+
+const sbQuestCtEl = document.getElementById("sbQuestCt");
+if(sbQuestCtEl) sbQuestCtEl.textContent = QL.length ? String(QL.length) : "";
+const questCatsEl = document.getElementById("questCats") || catsEl;
 
 if (QL.length){
   const PHASES = { 1:"① Замогилье и Крепость Круглого стола", 2:"② Плачущий полуостров → Грозовая Завеса", 3:"③ Лиурния Озёрная", 4:"④ Звёздные пустоши → Альтус → Поместье", 5:"⑤ Земли Теней (DLC)" };
   const gEl = document.createElement("div");
+  const qt = document.createElement("div");
+  qt.className = "qtools";
+  qt.innerHTML =
+    `<div class="qtools-head"><span>Цепочки (${QL.length})</span><span class="qtools-acts">` +
+      `<button type="button" class="qtools-act" id="qShowActive" title="Показать на карте все начатые и незавершённые квесты">Показать активные</button>` +
+      `<button type="button" class="qtools-act" id="qHideAll" title="Скрыть все квесты с карты">Скрыть все</button>` +
+    `</span></div>` +
+    `<div class="qfilter-row">` +
+      `<button type="button" class="qfilter-btn active" data-qf="all">Все <span id="qfc-all">${QL.length}</span></button>` +
+      `<button type="button" class="qfilter-btn" data-qf="active">В процессе <span id="qfc-active">0</span></button>` +
+      `<button type="button" class="qfilter-btn" data-qf="todo">Не начаты <span id="qfc-todo">0</span></button>` +
+      `<button type="button" class="qfilter-btn" data-qf="done">Завершены <span id="qfc-done">0</span></button>` +
+    `</div>`;
+  gEl.appendChild(qt);
+
   let curPhase = null;
-  QL.slice().sort((a,b)=>(a.ord||999)-(b.ord||999)).forEach(q => {   // sidebar follows the recommended completion order, grouped by phase
+  QL.slice().sort((a,b)=>((a.phase||99)-(b.phase||99))||((a.ord||999)-(b.ord||999))).forEach(q => {   // sidebar follows phase & recommended completion order
     questState[q.id] = false;
     if(q.phase !== curPhase){
       curPhase = q.phase;
-      const h = document.createElement("div"); h.className="group-h"; h.textContent = PHASES[q.phase] || "Квесты";
+      const h = document.createElement("div"); h.className="group-h qphase-h"; h.dataset.qphase=String(q.phase); h.textContent = PHASES[q.phase] || "Квесты";
       gEl.appendChild(h);
     }
     const row = document.createElement("div");
-    row.className = "cat quest-row off"; row.dataset.q = q.id;
+    row.className = "cat quest-row off"; row.dataset.q = q.id; row.dataset.qphase = String(q.phase);
     row.innerHTML = `<div class="dot" style="background:${q.color}"></div>
       <div class="nm">${q.name}</div><div class="ct">${q.steps.length}</div>`;
     row.onclick = () => toggleQuest(q.id);
     gEl.appendChild(row);
   });
-  catsEl.appendChild(gEl);
+  questCatsEl.appendChild(gEl);
+
+  qt.querySelectorAll(".qfilter-btn").forEach(btn => {
+    btn.onclick = () => {
+      questFilter = btn.dataset.qf;
+      refreshQuestList();
+      savePrefs();
+    };
+  });
+  const btnShowActive = document.getElementById("qShowActive");
+  if(btnShowActive) btnShowActive.onclick = () => {
+    QL.forEach(q => {
+      const { t, d } = qProgress(q);
+      const on = d > 0 && d < t;
+      questState[q.id] = on;
+      if(on) qsave.shown[q.id] = 1; else delete qsave.shown[q.id];
+      updateQuestRow(q);
+    });
+    saveQuests();
+    renderActiveQuests();
+  };
+  const btnHideAll = document.getElementById("qHideAll");
+  if(btnHideAll) btnHideAll.onclick = hideAllQuests;
+
   QL.forEach(q => { if(qsave.shown[q.id]) questState[q.id] = true; updateQuestRow(q); });   // restore saved visibility + progress
   renderActiveQuests();
+  refreshQuestList();
 }
 
 /* Restore saved filters + shared view last, once everything (incl. quests) is initialized. */

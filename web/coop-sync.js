@@ -13,12 +13,14 @@
 
   let autoFound = {};          // marker id -> true (graces + bosses + items + locations from .co2)
   let autoQuests = {};         // questId -> { npc_status, direct:{}, inferred:{}, current_step }
+  let autoNpcs = null;         // marker id -> { id, name, stage, status, quest_id }
   let latestState = null;
   let prevGraces = null;
   let prevBosses = null;
   let prevItems = null;
   let prevLocations = null;
   let prevQuestSteps = null;
+  let prevNpcs = null;
   let sse = null;
   let playerMarker = null;
 
@@ -44,6 +46,8 @@
       return null;
     },
     getNpcStatus: qid => autoQuests[qid]?.npc_status || "unknown",
+    hasDynamicNpcs: () => autoNpcs !== null,
+    getActiveNpc: id => (autoNpcs ? (autoNpcs[id] || null) : null),
   };
 
   function showToast(html, onClick) {
@@ -76,10 +80,11 @@
       zIndexOffset: 9500,
     }).addTo(map);
     const ch = latestState.character;
+    const area = p.area_name ? `${p.area_name} · ` : "";
     playerMarker.bindPopup(
       `<div class="pop-cat">Позиция в .co2</div>` +
       `<div class="pop-t">${ch?.name || "Персонаж"} (Ур. ${ch?.level ?? "?"})</div>` +
-      `<div class="pop-d">Карта: ${p.map_code} · px:${p.px}, py:${p.py}</div>`
+      `<div class="pop-d">${area}Карта: ${p.map_code} · px:${p.px}, py:${p.py}</div>`
     );
   }
 
@@ -87,7 +92,8 @@
     const p = latestState?.player_pos;
     if (!p) return;
     if (p.in_dungeon || p.px == null) {
-      showToast(`<span>🧭 Персонаж сейчас в подземелье (<code>${p.map_code}</code>) — точные координаты карты доступны на открытой местности.</span>`);
+      const dname = p.dungeon_name ? `<b>${p.dungeon_name}</b> (<code>${p.map_code}</code>)` : `<code>${p.map_code}</code>`;
+      showToast(`<span>🧭 Персонаж сейчас в подземелье: ${dname} — точные координаты карты доступны на открытой местности и под землёй (Сиофра / Ансель / Могвины).</span>`);
       return;
     }
     if (p.master !== activeBase) switchBase(p.master);
@@ -117,12 +123,30 @@
     }
   }
 
+  function renderWorldTags() {
+    const worldEl = document.getElementById("coopWorld");
+    if (!worldEl || !latestState || !latestState.ok) return;
+    const ws = latestState.world_state || {};
+    const ch = latestState.character || {};
+    const sb = ch.scadutree_blessing || 0;
+    const rb = ch.revered_blessing || 0;
+    const tags = [
+      { on: ws.radahn_defeated, label: "☄ Радан повержен" },
+      { on: ws.study_hall_inverted, label: "⌛ Башня перевёрнута" },
+      { on: ws.erdtree_burning, label: "🔥 Древо горит" },
+      { on: ws.frenzied_flame, label: "👁 Яростное пламя" },
+    ].filter(t => t.on);
+    if (sb > 0 || rb > 0 || (typeof activeBase !== "undefined" && activeBase === "M10")) {
+      tags.unshift({ on: true, label: `🌿 Древо +${sb} · 👻 Прах +${rb}` });
+    }
+    worldEl.innerHTML = tags.map(t => `<span class="coop-tag on">${t.label}</span>`).join("");
+  }
+
   function applyState(st) {
     latestState = st;
     const dot = document.getElementById("coopDot");
     const title = document.getElementById("coopStatusText");
     const meta = document.getElementById("coopMeta");
-    const worldEl = document.getElementById("coopWorld");
 
     if (!st || !st.ok) {
       if (dot) dot.className = "coop-dot err";
@@ -144,16 +168,7 @@
         `<span>⏱ ${nowStr}</span>`;
     }
 
-    if (worldEl && st.world_state) {
-      const ws = st.world_state;
-      const tags = [
-        { on: ws.radahn_defeated, label: "☄ Радан повержен" },
-        { on: ws.study_hall_inverted, label: "⌛ Башня перевёрнута" },
-        { on: ws.erdtree_burning, label: "🔥 Древо горит" },
-        { on: ws.frenzied_flame, label: "👁 Яростное пламя" },
-      ].filter(t => t.on);
-      worldEl.innerHTML = tags.map(t => `<span class="coop-tag on">${t.label}</span>`).join("");
-    }
+    renderWorldTags();
 
     // Populate character slots
     const slotSel = document.getElementById("coopSlotSel");
@@ -246,10 +261,34 @@
       }
     }
 
+    const nextNpcsById = {};
+    if (st.npcs && st.npcs.active) {
+      for (const [mid, nval] of Object.entries(st.npcs.active)) {
+        nextNpcsById[nval.id] = { marker_id: mid, ...nval };
+      }
+      if (prevNpcs !== null) {
+        for (const [nid, ninfo] of Object.entries(nextNpcsById)) {
+          const prev = prevNpcs[nid];
+          if (!prev) {
+            showToast(
+              `<span>💬 Встречен НПС: <b>${ninfo.name}</b></span><small>Показать</small>`,
+              () => flyToMarker(ninfo.marker_id)
+            );
+          } else if (prev.marker_id !== ninfo.marker_id) {
+            showToast(
+              `<span>🧭 <b>${ninfo.name}</b> переместился: ${ninfo.stage}</span><small>Показать</small>`,
+              () => flyToMarker(ninfo.marker_id)
+            );
+          }
+        }
+      }
+    }
+
     prevGraces = nextGraces;
     prevBosses = nextBosses;
     prevItems = nextItems;
     prevLocations = nextLocations;
+    prevNpcs = nextNpcsById;
     prevQuestSteps = {};
     if (st.quests) {
       for (const [qid, qval] of Object.entries(st.quests)) {
@@ -257,7 +296,7 @@
       }
     }
 
-    // Apply autoFound & autoQuests to map UI
+    // Apply autoFound, autoQuests & autoNpcs to map UI
     const nextAuto = {};
     for (const gid of nextGraces) nextAuto[gid] = true;
     for (const bid of nextBosses) nextAuto[bid] = true;
@@ -265,6 +304,7 @@
     for (const lid of nextLocations) nextAuto[lid] = true;
     autoFound = nextAuto;
     autoQuests = st.quests || {};
+    autoNpcs = st.npcs ? (st.npcs.active || {}) : null;
 
     if (typeof markerRefs !== "undefined") {
       markerRefs.forEach(r => {
@@ -280,11 +320,13 @@
       QL.forEach(q => {
         if (typeof updateQuestRow === "function") updateQuestRow(q);
       });
+      if (typeof refreshQuestList === "function") refreshQuestList();
       if (typeof renderActiveQuests === "function") renderActiveQuests();
       if (typeof panelQuest !== "undefined" && panelQuest && typeof fillPanel === "function") {
         fillPanel(panelQuest);
       }
     }
+    if (typeof renderRegionPanel === "function") renderRegionPanel();
     updatePlayerMarker();
   }
 
@@ -302,11 +344,18 @@
         prefs.file = data.saves[0].path;
         saveCoopPrefs();
       }
+      const steamIds = new Set(data.saves.map(s => (s.name || "").split("/")[0]).filter(Boolean));
+      const multiAcc = steamIds.size > 1;
       sel.innerHTML = data.saves.map(s => {
-        const tag = s.is_coop ? ".co2" : ".sl2";
-        const bkp = s.is_backup ? " [Backup]" : "";
-        return `<option value="${s.path}" ${s.path === prefs.file ? "selected" : ""}>${s.name} (${tag}${bkp})</option>`;
+        const parts = (s.name || "").split("/");
+        const steam = parts.length > 1 ? parts[0] : "";
+        const fname = parts[parts.length - 1] || s.name;
+        const accSuffix = (multiAcc && steam) ? ` · …${steam.slice(-4)}` : "";
+        const bkp = s.is_backup ? " [резерв]" : "";
+        return `<option value="${s.path}" title="${s.name}" ${s.path === prefs.file ? "selected" : ""}>${fname}${accSuffix}${bkp}</option>`;
       }).join("");
+      const curSave = data.saves.find(s => s.path === prefs.file);
+      sel.title = curSave ? curSave.name : "Файл сохранения (.co2 / .sl2)";
     } catch (e) {}
   }
 
@@ -352,6 +401,28 @@
     } catch (e) {}
   }
 
+  async function checkAppUpdate() {
+    try {
+      const box = document.getElementById("coopBox");
+      if (!box) return;
+      const res = await fetch("/api/update-check");
+      const data = await res.json();
+      if (!data || !data.update_available) return;
+      let chip = document.getElementById("coopUpdateChip");
+      if (!chip) {
+        chip = document.createElement("div");
+        chip.id = "coopUpdateChip";
+        chip.className = "coop-update";
+        box.appendChild(chip);
+      }
+      chip.innerHTML =
+        `<a href="${data.release_url}" target="_blank" rel="noopener">⬆ Доступна версия v${data.latest} (сейчас v${data.current})</a>` +
+        `<button type="button" class="coop-update-x" title="Скрыть">✕</button>`;
+      const xbtn = chip.querySelector(".coop-update-x");
+      if (xbtn) xbtn.onclick = () => chip.remove();
+    } catch (e) {}
+  }
+
   function initUI() {
     const box = document.getElementById("coopBox");
     if (!box) return;
@@ -378,13 +449,14 @@
     fileSel.onchange = () => {
       prefs.file = fileSel.value;
       prefs.slot = 0;
-      prevGraces = null; prevBosses = null; prevItems = null; prevLocations = null; prevQuestSteps = null;
+      fileSel.title = fileSel.options[fileSel.selectedIndex]?.title || fileSel.value;
+      prevGraces = null; prevBosses = null; prevItems = null; prevLocations = null; prevQuestSteps = null; prevNpcs = null;
       saveCoopPrefs();
       connectSSE();
     };
     slotSel.onchange = () => {
       prefs.slot = parseInt(slotSel.value, 10) || 0;
-      prevGraces = null; prevBosses = null; prevItems = null; prevLocations = null; prevQuestSteps = null;
+      prevGraces = null; prevBosses = null; prevItems = null; prevLocations = null; prevQuestSteps = null; prevNpcs = null;
       saveCoopPrefs();
       connectSSE();
     };
@@ -401,10 +473,11 @@
       rebuildCluster();
     };
 
-    // Re-draw player marker whenever base map changes
-    window._onBaseSwitch = () => updatePlayerMarker();
+    // Re-draw player marker & DLC blessing pill whenever base map changes
+    window._onBaseSwitch = () => { updatePlayerMarker(); renderWorldTags(); };
 
     loadSavesList().then(() => connectSSE());
+    checkAppUpdate();
   }
 
   window.addEventListener("DOMContentLoaded", initUI);

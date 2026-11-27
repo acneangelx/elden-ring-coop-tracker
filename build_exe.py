@@ -39,12 +39,15 @@ def run_pyinstaller() -> None:
     cmd = [
         str(PYINSTALLER),
         "--onefile",
-        "--console",
+        "--noconsole",
         "--noconfirm",
         "--clean",
         "--name", "EldenRingCoopTracker",
+        "--icon", str(ROOT / "assets" / "app.ico"),
         "--add-data", f"{ROOT / 'data'};data",
         "--add-data", f"{WEB_ZIP};.",
+        "--add-data", f"{ROOT / 'assets' / 'app.ico'};.",
+        "--hidden-import", "pystray._win32",
         str(ROOT / "server.py"),
     ]
     print("Running:", " ".join(cmd))

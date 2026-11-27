@@ -58,6 +58,9 @@ class SaveDataStore:
         self.spirit_ash_ids: set[int] = set()
         self.altered_armor_map: dict[int, int] = {}
         self.location_rules: dict[str, dict[str, Any]] = {}
+        self.legacy_conv: dict[str, list[dict[str, Any]]] = {}
+        self.dungeon_names: dict[str, str] = {}
+        self.npc_rules: list[dict[str, Any]] = []
         self._load()
 
     def _read_web_text(self, rel_path: str) -> str | None:
@@ -109,6 +112,17 @@ class SaveDataStore:
         loc_rules_path = self.base_dir / "data" / "location_rules.json"
         if loc_rules_path.exists():
             self.location_rules = json.loads(loc_rules_path.read_text(encoding="utf-8"))
+
+        legacy_path = self.base_dir / "data" / "legacy_conv.json"
+        if legacy_path.exists():
+            lc = json.loads(legacy_path.read_text(encoding="utf-8"))
+            for row in lc.get("conv", ()):
+                self.legacy_conv.setdefault(row["srcMapId"], []).append(row)
+            self.dungeon_names = lc.get("dungeon_names", {})
+
+        npc_rules_path = self.base_dir / "data" / "npc_rules.json"
+        if npc_rules_path.exists():
+            self.npc_rules = json.loads(npc_rules_path.read_text(encoding="utf-8"))
 
         qtxt = self._read_web_text("quests.js")
         if qtxt:
@@ -260,10 +274,13 @@ def _decode_inventory_block(
     return pos
 
 
-def _project_player_pos(map_bytes: bytes, x: float, y: float, z: float) -> dict[str, Any]:
-    """Project overworld/DLC coordinates onto master map pixels (px, py)."""
+def _project_player_pos(
+    store: SaveDataStore, map_bytes: bytes, x: float, y: float, z: float
+) -> dict[str, Any]:
+    """Project overworld, DLC, and underground/legacy dungeon coordinates onto master map pixels (px, py)."""
     b0, b1, b2, b3 = map_bytes[0], map_bytes[1], map_bytes[2], map_bytes[3]
-    map_code = f"m{b3:02d}_{b2:02d}_{b1:02d}_{b0:02d}"
+    block = f"m{b3:02d}_{b2:02d}_{b1:02d}"
+    map_code = f"{block}_{b0:02d}"
     if b3 in (60, 61) and b0 <= 2:
         size = 256.0 * (2 ** b0)
         wx = b2 * size + size / 2.0 + x
@@ -274,14 +291,29 @@ def _project_player_pos(map_bytes: bytes, x: float, y: float, z: float) -> dict[
             "px": round(wx + OFFSET_X, 1),
             "py": round(OFFSET_Y - wz, 1),
             "map_code": map_code,
+            "area_name": "",
             "in_dungeon": False,
         }
+
+    conv_list = store.legacy_conv.get(block)
+    if conv_list:
+        best = min(conv_list, key=lambda c: (x - c["srcX"]) ** 2 + (z - c["srcZ"]) ** 2)
+        return {
+            "master": best["master"],
+            "px": round(x + best["addX"] + OFFSET_X, 1),
+            "py": round(OFFSET_Y - (z + best["addZ"]), 1),
+            "map_code": map_code,
+            "area_name": store.dungeon_names.get(block, ""),
+            "in_dungeon": False,
+        }
+
     master_guess = "M01" if b3 == 12 else ("M10" if 20 <= b3 <= 28 or b3 in (40, 41, 42, 43) else "M00")
     return {
         "master": master_guess,
         "px": None,
         "py": None,
         "map_code": map_code,
+        "dungeon_name": store.dungeon_names.get(block, map_code),
         "in_dungeon": True,
     }
 
@@ -320,6 +352,86 @@ def _any_flag(event_flags: bytes, bst: dict[int, int], fids: Any) -> bool:
     return any(get_event_flag(event_flags, bst, fid) for fid in fids)
 
 
+def _read_npc_status(event_flags: bytes, bst: dict[int, int], npc_base: int | None) -> str:
+    """Resolve persistent NPC status (alive / hostile / dead / unknown)."""
+    if npc_base is None:
+        return "unknown"
+    if get_event_flag(event_flags, bst, npc_base + 3):
+        return "dead"
+    if get_event_flag(event_flags, bst, npc_base + 1) or get_event_flag(event_flags, bst, npc_base + 2):
+        return "hostile"
+    if get_event_flag(event_flags, bst, npc_base):
+        return "alive"
+    return "unknown"
+
+
+def _evaluate_npcs(
+    store: SaveDataStore,
+    event_flags: bytes,
+    unlocked_graces: set[int],
+    defeated_bosses: set[int],
+    quests: dict[str, Any],
+    pools: dict[str, set[int]],
+    world_state: dict[str, bool],
+) -> dict[str, Any]:
+    """Determine met NPCs and their single current active map pin."""
+    active: dict[str, dict[str, Any]] = {}
+    met_count = 0
+    goods = pools["goods"]
+
+    for rule in store.npc_rules:
+        qid = rule.get("quest_id")
+        qstate = quests.get(qid, {}) if qid else {}
+        q_direct = {int(k) for k in qstate.get("direct", {})}
+        q_all = q_direct | {int(k) for k in qstate.get("inferred", {})}
+
+        met_cfg = rule.get("met", {})
+        is_met = (
+            any(sn in q_direct for sn in met_cfg.get("quest_steps", ()))
+            or _any_flag(event_flags, store.bst, met_cfg.get("flags", ()))
+            or any(gid in unlocked_graces for gid in met_cfg.get("graces", ()))
+            or any(bid in defeated_bosses for bid in met_cfg.get("bosses", ()))
+            or any(iid in goods for iid in met_cfg.get("goods", ()))
+        )
+        if not is_met:
+            continue
+
+        met_count += 1
+        status = _read_npc_status(event_flags, store.bst, rule.get("npc_flag_base"))
+        stages = rule.get("stages", [])
+        chosen = stages[-1] if stages else None
+
+        for st in stages:
+            has_cond = any(k in st for k in ("quest_any_step", "flags", "bosses", "world_state"))
+            if not has_cond:
+                chosen = st
+                break
+            matched = (
+                any(sn in q_all for sn in st.get("quest_any_step", ()))
+                or _any_flag(event_flags, store.bst, st.get("flags", ()))
+                or any(bid in defeated_bosses or get_event_flag(event_flags, store.bst, bid) for bid in st.get("bosses", ()))
+                or (bool(st.get("world_state")) and bool(world_state.get(st["world_state"])))
+            )
+            if matched:
+                chosen = st
+                break
+
+        if chosen:
+            active[chosen["marker_id"]] = {
+                "id": rule["id"],
+                "name": rule["name"],
+                "stage": chosen["stage"],
+                "status": status,
+                "quest_id": qid or "",
+            }
+
+    return {
+        "active": active,
+        "met_count": met_count,
+        "total_npcs": len(store.npc_rules),
+    }
+
+
 def _evaluate_quests(
     store: SaveDataStore,
     event_flags: bytes,
@@ -337,17 +449,7 @@ def _evaluate_quests(
     out: dict[str, Any] = {}
     for qid, total_steps in store.quest_step_counts.items():
         rule = store.quest_rules.get(qid, {})
-        npc_base = rule.get("npc_flag_base")
-        npc_status = "unknown"
-        if npc_base is not None:
-            if get_event_flag(event_flags, store.bst, npc_base + 3):
-                npc_status = "dead"
-            elif get_event_flag(event_flags, store.bst, npc_base + 1) or get_event_flag(
-                event_flags, store.bst, npc_base + 2
-            ):
-                npc_status = "hostile"
-            elif get_event_flag(event_flags, store.bst, npc_base):
-                npc_status = "alive"
+        npc_status = _read_npc_status(event_flags, store.bst, rule.get("npc_flag_base"))
 
         step_rules = rule.get("steps", {})
         direct_done: dict[int, str] = {}
@@ -495,6 +597,10 @@ def parse_save_state(store: SaveDataStore, path: str, slot_idx: int = 0) -> dict
         .split("\x00")[0]
         .strip()
     )
+    scadutree_blessing = data[pg_start + 0xF4]
+    revered_blessing = data[pg_start + 0xF5]
+    crimson_flasks = data[pg_start + 0xF9]
+    cerulean_flasks = data[pg_start + 0xFA]
     pos = pg_start + 0x1B0
     pos += 0xD * 16
     pos += (22 + 7 + 22 + 22) * 4
@@ -551,7 +657,7 @@ def parse_save_state(store: SaveDataStore, path: str, slot_idx: int = 0) -> dict
             pos_after_ef += 4 + max(0, sz)
         px, py, pz = struct.unpack_from("<fff", data, pos_after_ef)
         map_bytes = data[pos_after_ef + 12 : pos_after_ef + 16]
-        player_pos = _project_player_pos(map_bytes, px, py, pz)
+        player_pos = _project_player_pos(store, map_bytes, px, py, pz)
     except Exception:
         player_pos = None
 
@@ -572,7 +678,10 @@ def parse_save_state(store: SaveDataStore, path: str, slot_idx: int = 0) -> dict
     collected_items: list[str] = []
     for mid, irule in store.item_rules.items():
         pool = pools.get(irule.get("pool", ""), set())
+        all_fl = irule.get("all_flags", ())
         if any(iid in pool for iid in irule.get("ids", ())):
+            collected_items.append(mid)
+        elif all_fl and all(get_event_flag(event_flags, store.bst, fid) for fid in all_fl):
             collected_items.append(mid)
         elif any(get_event_flag(event_flags, store.bst, fid) for fid in irule.get("flags", ())):
             collected_items.append(mid)
@@ -613,6 +722,10 @@ def parse_save_state(store: SaveDataStore, path: str, slot_idx: int = 0) -> dict
         "frenzied_flame": get_event_flag(event_flags, store.bst, 108),
     }
 
+    npcs = _evaluate_npcs(
+        store, event_flags, unlocked_graces, defeated_bosses, quests, pools, world_state
+    )
+
     return {
         "file": path,
         "mtime_ns": str(mtime_ns),
@@ -625,6 +738,10 @@ def parse_save_state(store: SaveDataStore, path: str, slot_idx: int = 0) -> dict
             "level": level,
             "runes": runes,
             "deaths": total_deaths,
+            "scadutree_blessing": scadutree_blessing if scadutree_blessing <= 20 else 0,
+            "revered_blessing": revered_blessing if revered_blessing <= 10 else 0,
+            "crimson_flasks": crimson_flasks,
+            "cerulean_flasks": cerulean_flasks,
         },
         "player_pos": player_pos,
         "world_state": world_state,
@@ -632,6 +749,7 @@ def parse_save_state(store: SaveDataStore, path: str, slot_idx: int = 0) -> dict
         "bosses": defeated_boss_markers,
         "items": collected_items,
         "locations": found_locations,
+        "npcs": npcs,
         "counts": {
             "graces": len(unlocked_graces),
             "graces_total": len(store.grace_ids),
@@ -641,6 +759,8 @@ def parse_save_state(store: SaveDataStore, path: str, slot_idx: int = 0) -> dict
             "items_total": len(store.item_rules),
             "locations": len(found_locations),
             "locations_total": len(store.location_rules),
+            "npcs_met": npcs["met_count"],
+            "npcs_total": npcs["total_npcs"],
         },
         "quests": quests,
     }
