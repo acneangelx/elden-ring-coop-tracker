@@ -1,0 +1,1698 @@
+{
+  "l1": {
+    "boss_flags": [
+      18000850
+    ],
+    "grace_flags": [
+      71800
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l2": {
+    "boss_flags": [
+      18000800
+    ],
+    "grace_flags": [
+      71801
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l3": {
+    "boss_flags": [
+      30000800
+    ],
+    "grace_flags": [
+      73000
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l4": {
+    "boss_flags": [
+      30010800
+    ],
+    "grace_flags": [
+      73001
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l5": {
+    "boss_flags": [
+      30020800
+    ],
+    "grace_flags": [
+      73002
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l6": {
+    "boss_flags": [
+      30030800
+    ],
+    "grace_flags": [
+      73003
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l7": {
+    "boss_flags": [
+      30040800
+    ],
+    "grace_flags": [
+      73004
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l8": {
+    "boss_flags": [
+      30050800,
+      30050850
+    ],
+    "grace_flags": [
+      73005
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l9": {
+    "boss_flags": [
+      30060800
+    ],
+    "grace_flags": [
+      73006
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l10": {
+    "boss_flags": [
+      30070800
+    ],
+    "grace_flags": [
+      73007
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l11": {
+    "boss_flags": [
+      30080800
+    ],
+    "grace_flags": [
+      73008
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l12": {
+    "boss_flags": [
+      30090800
+    ],
+    "grace_flags": [
+      73009
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l13": {
+    "boss_flags": [
+      30100800
+    ],
+    "grace_flags": [
+      73010
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l14": {
+    "boss_flags": [
+      30110800
+    ],
+    "grace_flags": [
+      73011
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l15": {
+    "boss_flags": [
+      30120800
+    ],
+    "grace_flags": [
+      73012
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l16": {
+    "boss_flags": [
+      30140800
+    ],
+    "grace_flags": [
+      73014
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l17": {
+    "boss_flags": [
+      30150800
+    ],
+    "grace_flags": [
+      73015
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l18": {
+    "boss_flags": [
+      30160800
+    ],
+    "grace_flags": [
+      73016
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l19": {
+    "boss_flags": [
+      30170800
+    ],
+    "grace_flags": [
+      73017
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l20": {
+    "boss_flags": [
+      30180800
+    ],
+    "grace_flags": [
+      73018
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l21": {
+    "boss_flags": [
+      30190800
+    ],
+    "grace_flags": [
+      73019
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l22": {
+    "boss_flags": [
+      31000800
+    ],
+    "grace_flags": [
+      73100
+    ],
+    "flags": [
+      31009206
+    ],
+    "items": []
+  },
+  "l23": {
+    "boss_flags": [
+      31010800
+    ],
+    "grace_flags": [
+      73101
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l24": {
+    "boss_flags": [
+      31020800
+    ],
+    "grace_flags": [
+      73102
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l25": {
+    "boss_flags": [
+      31030800
+    ],
+    "grace_flags": [
+      73103
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l26": {
+    "boss_flags": [
+      31040800
+    ],
+    "grace_flags": [
+      73104
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l27": {
+    "boss_flags": [
+      31050800
+    ],
+    "grace_flags": [
+      73105
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l28": {
+    "boss_flags": [
+      31060800
+    ],
+    "grace_flags": [
+      73106
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l29": {
+    "boss_flags": [
+      31070800
+    ],
+    "grace_flags": [
+      73107
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l30": {
+    "boss_flags": [
+      31090800
+    ],
+    "grace_flags": [
+      73109
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l31": {
+    "boss_flags": [
+      31100800
+    ],
+    "grace_flags": [
+      73110
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l32": {
+    "boss_flags": [
+      31110800
+    ],
+    "grace_flags": [
+      73111
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l33": {
+    "boss_flags": [
+      31120800
+    ],
+    "grace_flags": [
+      73112
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l34": {
+    "boss_flags": [
+      31150800
+    ],
+    "grace_flags": [
+      73115
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l35": {
+    "boss_flags": [
+      31170800
+    ],
+    "grace_flags": [
+      73117
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l36": {
+    "boss_flags": [
+      31180800
+    ],
+    "grace_flags": [
+      73118
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l37": {
+    "boss_flags": [
+      31190800,
+      31190850
+    ],
+    "grace_flags": [
+      73119
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l38": {
+    "boss_flags": [
+      31200800
+    ],
+    "grace_flags": [
+      73120
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l39": {
+    "boss_flags": [
+      31210800
+    ],
+    "grace_flags": [
+      73121
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l40": {
+    "boss_flags": [
+      31220800
+    ],
+    "grace_flags": [
+      73122
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l41": {
+    "boss_flags": [
+      32000800
+    ],
+    "grace_flags": [
+      73200
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l42": {
+    "boss_flags": [
+      32020800
+    ],
+    "grace_flags": [
+      73202
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l43": {
+    "boss_flags": [
+      32040800
+    ],
+    "grace_flags": [
+      73204
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l44": {
+    "boss_flags": [
+      32050800
+    ],
+    "grace_flags": [
+      73205
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l45": {
+    "boss_flags": [
+      32070800
+    ],
+    "grace_flags": [
+      73207
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l46": {
+    "boss_flags": [
+      32080800
+    ],
+    "grace_flags": [
+      73208
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l47": {
+    "boss_flags": [
+      32110800
+    ],
+    "grace_flags": [
+      73211
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l48": {
+    "boss_flags": [
+      34120800
+    ],
+    "grace_flags": [
+      73431
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l49": {
+    "boss_flags": [
+      35000850
+    ],
+    "grace_flags": [
+      73503
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l50": {
+    "boss_flags": [
+      40000800
+    ],
+    "grace_flags": [
+      74000
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l51": {
+    "boss_flags": [
+      40010800
+    ],
+    "grace_flags": [
+      74001
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l52": {
+    "boss_flags": [
+      2052430800
+    ],
+    "grace_flags": [
+      74002
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l53": {
+    "boss_flags": [
+      41000800
+    ],
+    "grace_flags": [
+      74100
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l54": {
+    "boss_flags": [
+      41010800
+    ],
+    "grace_flags": [
+      74101
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l55": {
+    "boss_flags": [
+      41020800
+    ],
+    "grace_flags": [
+      74102
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l56": {
+    "boss_flags": [],
+    "grace_flags": [
+      74200
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l57": {
+    "boss_flags": [],
+    "grace_flags": [
+      74202
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l58": {
+    "boss_flags": [],
+    "grace_flags": [
+      74203
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l59": {
+    "boss_flags": [
+      43000800
+    ],
+    "grace_flags": [
+      74300
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l60": {
+    "boss_flags": [
+      43010800
+    ],
+    "grace_flags": [
+      74301
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l61": {
+    "boss_flags": [],
+    "grace_flags": [
+      76160
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l62": {
+    "boss_flags": [],
+    "grace_flags": [
+      76812
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l63": {
+    "boss_flags": [
+      39200800
+    ],
+    "grace_flags": [
+      73901
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l64": {
+    "boss_flags": [],
+    "grace_flags": [
+      76113
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l65": {
+    "boss_flags": [
+      1044360800
+    ],
+    "grace_flags": [
+      76120
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l66": {
+    "boss_flags": [],
+    "grace_flags": [
+      76202
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l67": {
+    "boss_flags": [],
+    "grace_flags": [
+      76236
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l68": {
+    "boss_flags": [],
+    "grace_flags": [
+      76403
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l69": {
+    "boss_flags": [],
+    "grace_flags": [
+      76501
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l70": {
+    "boss_flags": [],
+    "grace_flags": [
+      76503
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l71": {
+    "boss_flags": [],
+    "grace_flags": [
+      76653
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l72": {
+    "boss_flags": [],
+    "grace_flags": [
+      76801
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l73": {
+    "boss_flags": [],
+    "grace_flags": [
+      76902
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l74": {
+    "boss_flags": [],
+    "grace_flags": [
+      76913
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l75": {
+    "boss_flags": [],
+    "grace_flags": [
+      76941
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l76": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1067"
+    ]
+  },
+  "l77": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1267"
+    ]
+  },
+  "l78": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1300"
+    ]
+  },
+  "l79": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1223"
+    ]
+  },
+  "l80": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1260"
+    ]
+  },
+  "l81": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1176"
+    ]
+  },
+  "l82": {
+    "boss_flags": [
+      1034480800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l83": {
+    "boss_flags": [],
+    "grace_flags": [
+      76226
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l84": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1329"
+    ]
+  },
+  "l85": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1318"
+    ]
+  },
+  "l86": {
+    "boss_flags": [
+      1038520800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l87": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1200"
+    ]
+  },
+  "l88": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1210"
+    ]
+  },
+  "l89": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1126"
+    ]
+  },
+  "l90": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1399"
+    ]
+  },
+  "l91": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1319"
+    ]
+  },
+  "l92": {
+    "boss_flags": [],
+    "grace_flags": [
+      76834
+    ],
+    "flags": [
+      2050400600
+    ],
+    "items": []
+  },
+  "l93": {
+    "boss_flags": [
+      25000800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l94": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [
+      2053460600
+    ],
+    "items": []
+  },
+  "l95": {
+    "boss_flags": [],
+    "grace_flags": [
+      71103
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l96": {
+    "boss_flags": [],
+    "grace_flags": [
+      71402
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l97": {
+    "boss_flags": [],
+    "grace_flags": [
+      71603
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l98": {
+    "boss_flags": [],
+    "grace_flags": [
+      73500
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l99": {
+    "boss_flags": [],
+    "grace_flags": [
+      76100
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l100": {
+    "boss_flags": [],
+    "grace_flags": [
+      76104
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l101": {
+    "boss_flags": [],
+    "grace_flags": [
+      76150
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l102": {
+    "boss_flags": [],
+    "grace_flags": [
+      76162
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l103": {
+    "boss_flags": [],
+    "grace_flags": [
+      76208
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l104": {
+    "boss_flags": [],
+    "grace_flags": [
+      76224
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l105": {
+    "boss_flags": [],
+    "grace_flags": [
+      76240
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l106": {
+    "boss_flags": [],
+    "grace_flags": [
+      76251
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l107": {
+    "boss_flags": [],
+    "grace_flags": [
+      76310
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l108": {
+    "boss_flags": [],
+    "grace_flags": [
+      76400
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l109": {
+    "boss_flags": [],
+    "grace_flags": [
+      76404
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l110": {
+    "boss_flags": [],
+    "grace_flags": [
+      76418
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l111": {
+    "boss_flags": [],
+    "grace_flags": [
+      76454
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l112": {
+    "boss_flags": [],
+    "grace_flags": [
+      76505
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l113": {
+    "boss_flags": [],
+    "grace_flags": [
+      76507
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l114": {
+    "boss_flags": [],
+    "grace_flags": [
+      76864
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l115": {
+    "boss_flags": [],
+    "grace_flags": [
+      76906
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l116": {
+    "boss_flags": [],
+    "grace_flags": [
+      76945
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l117": {
+    "boss_flags": [
+      10010800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l118": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [
+      1041399205
+    ],
+    "items": []
+  },
+  "l119": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [
+      1035449205,
+      1035449206,
+      1035449207
+    ],
+    "items": []
+  },
+  "l120": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [
+      1044320800
+    ],
+    "items": []
+  },
+  "l121": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l122": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [
+      1039520180
+    ],
+    "items": [
+      "i1198"
+    ]
+  },
+  "l123": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1435"
+    ]
+  },
+  "l124": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [
+      68830,
+      2047440180
+    ],
+    "items": []
+  },
+  "l125": {
+    "boss_flags": [
+      1044350800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l126": {
+    "boss_flags": [
+      1042370800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l127": {
+    "boss_flags": [
+      1042330800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l128": {
+    "boss_flags": [
+      1038410800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l129": {
+    "boss_flags": [
+      1033450800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l130": {
+    "boss_flags": [
+      1036500800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l131": {
+    "boss_flags": [
+      1033420800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l132": {
+    "boss_flags": [
+      1049390850
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l133": {
+    "boss_flags": [
+      1039500800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l134": {
+    "boss_flags": [
+      1053560800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l135": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [
+      65877,
+      1046369205
+    ],
+    "items": [
+      "i1306"
+    ]
+  },
+  "l136": {
+    "boss_flags": [
+      1043300800
+    ],
+    "grace_flags": [
+      71050,
+      76158
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l137": {
+    "boss_flags": [
+      10000800
+    ],
+    "grace_flags": [
+      71008
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l138": {
+    "boss_flags": [
+      14000800
+    ],
+    "grace_flags": [
+      71402,
+      76206
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l139": {
+    "boss_flags": [
+      1035500800
+    ],
+    "grace_flags": [
+      76214
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l140": {
+    "boss_flags": [],
+    "grace_flags": [
+      76402
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l141": {
+    "boss_flags": [],
+    "grace_flags": [
+      76453
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l142": {
+    "boss_flags": [
+      1252380800
+    ],
+    "grace_flags": [
+      76419
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l143": {
+    "boss_flags": [
+      1039540800
+    ],
+    "grace_flags": [
+      76320
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l144": {
+    "boss_flags": [
+      16000800
+    ],
+    "grace_flags": [
+      71602
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l145": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1111"
+    ]
+  },
+  "l146": {
+    "boss_flags": [
+      1051570800
+    ],
+    "grace_flags": [
+      76522
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l147": {
+    "boss_flags": [],
+    "grace_flags": [
+      76909
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l148": {
+    "boss_flags": [
+      2048440800
+    ],
+    "grace_flags": [
+      76821
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l149": {
+    "boss_flags": [
+      21000850,
+      21010800
+    ],
+    "grace_flags": [
+      72102
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l150": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l151": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l152": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l153": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1181"
+    ]
+  },
+  "l154": {
+    "boss_flags": [],
+    "grace_flags": [
+      76228
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l155": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1091"
+    ]
+  },
+  "l156": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1088"
+    ]
+  },
+  "l157": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1077"
+    ]
+  },
+  "l158": {
+    "boss_flags": [],
+    "grace_flags": [
+      76455
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l159": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1192"
+    ]
+  },
+  "l160": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1413"
+    ]
+  },
+  "l161": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1380"
+    ]
+  },
+  "l162": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1520"
+    ]
+  },
+  "l163": {
+    "boss_flags": [],
+    "grace_flags": [
+      73412
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l164": {
+    "boss_flags": [],
+    "grace_flags": [
+      73422
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l165": {
+    "boss_flags": [],
+    "grace_flags": [
+      73430
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l166": {
+    "boss_flags": [],
+    "grace_flags": [
+      73432
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l167": {
+    "boss_flags": [],
+    "grace_flags": [
+      73440
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l168": {
+    "boss_flags": [],
+    "grace_flags": [
+      73441
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l169": {
+    "boss_flags": [],
+    "grace_flags": [
+      73450
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l170": {
+    "boss_flags": [],
+    "grace_flags": [
+      73451
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l171": {
+    "boss_flags": [],
+    "grace_flags": [
+      73460
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l172": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1299"
+    ]
+  },
+  "l173": {
+    "boss_flags": [
+      1043330800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l174": {
+    "boss_flags": [
+      1033430800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l175": {
+    "boss_flags": [
+      1038480800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l176": {
+    "boss_flags": [
+      1047400800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l177": {
+    "boss_flags": [
+      1051400800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l178": {
+    "boss_flags": [
+      1041530800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l179": {
+    "boss_flags": [
+      1037540810
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l180": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [],
+    "items": [
+      "i1293"
+    ]
+  },
+  "l181": {
+    "boss_flags": [
+      1052560800
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l182": {
+    "boss_flags": [
+      1050570850
+    ],
+    "grace_flags": [],
+    "flags": [],
+    "items": []
+  },
+  "l183": {
+    "boss_flags": [
+      1045390800
+    ],
+    "grace_flags": [
+      76113
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l184": {
+    "boss_flags": [],
+    "grace_flags": [
+      76220
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l185": {
+    "boss_flags": [],
+    "grace_flags": [
+      76245
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l186": {
+    "boss_flags": [
+      1042550800
+    ],
+    "grace_flags": [
+      76308
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l187": {
+    "boss_flags": [],
+    "grace_flags": [
+      76357
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l188": {
+    "boss_flags": [],
+    "grace_flags": [
+      76903
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l189": {
+    "boss_flags": [],
+    "grace_flags": [
+      76118
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l190": {
+    "boss_flags": [],
+    "grace_flags": [
+      76102
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l191": {
+    "boss_flags": [],
+    "grace_flags": [
+      76216
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l192": {
+    "boss_flags": [],
+    "grace_flags": [
+      76215
+    ],
+    "flags": [],
+    "items": []
+  },
+  "l193": {
+    "boss_flags": [],
+    "grace_flags": [],
+    "flags": [
+      1050389205,
+      1050389208
+    ],
+    "items": []
+  }
+}

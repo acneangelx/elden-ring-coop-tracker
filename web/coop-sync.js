@@ -11,11 +11,13 @@
     try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {}
   }
 
-  let autoFound = {};          // marker id -> true (graces + bosses from .co2)
+  let autoFound = {};          // marker id -> true (graces + bosses + items + locations from .co2)
   let autoQuests = {};         // questId -> { npc_status, direct:{}, inferred:{}, current_step }
   let latestState = null;
   let prevGraces = null;
   let prevBosses = null;
+  let prevItems = null;
+  let prevLocations = null;
   let prevQuestSteps = null;
   let sse = null;
   let playerMarker = null;
@@ -133,8 +135,12 @@
     const nowStr = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     if (title) title.textContent = `Live: ${ch.name || "Герой"} (Ур. ${ch.level ?? "?"})`;
     if (meta) {
+      const itemsDone = st.counts.items ?? 0;
+      const locsDone = st.counts.locations ?? 0;
       meta.innerHTML =
-        `<span>🔥 <b>${st.counts.graces}</b>/${st.counts.graces_total} · 💀 <b>${st.counts.bosses}</b>/${st.counts.bosses_total}</span>` +
+        `<span title="Благодати: ${st.counts.graces}/${st.counts.graces_total} · Боссы: ${st.counts.bosses}/${st.counts.bosses_total} · Предметы: ${itemsDone}/${st.counts.items_total ?? 0} · Локации: ${locsDone}/${st.counts.locations_total ?? 0}">` +
+        `🔥 <b>${st.counts.graces}</b>/${st.counts.graces_total} · 💀 <b>${st.counts.bosses}</b>/${st.counts.bosses_total} · 🎒 <b>${itemsDone}</b>` +
+        `</span>` +
         `<span>⏱ ${nowStr}</span>`;
     }
 
@@ -166,6 +172,8 @@
     // Detect diffs for toast notifications (skip very first load)
     const nextGraces = new Set(st.graces || []);
     const nextBosses = new Set(st.bosses || []);
+    const nextItems = new Set(st.items || []);
+    const nextLocations = new Set(st.locations || []);
 
     if (prevGraces !== null) {
       for (const gid of nextGraces) {
@@ -189,6 +197,38 @@
         }
       }
     }
+    if (prevLocations !== null) {
+      for (const lid of nextLocations) {
+        if (!prevLocations.has(lid)) {
+          const m = markerById[lid];
+          showToast(
+            `<span>🏰 Локация открыта: <b>${m ? m.name : lid}</b></span><small>Показать</small>`,
+            () => flyToMarker(lid)
+          );
+        }
+      }
+    }
+    if (prevItems !== null) {
+      const addedItems = [];
+      for (const iid of nextItems) {
+        if (!prevItems.has(iid)) addedItems.push(iid);
+      }
+      if (addedItems.length > 3) {
+        const lastId = addedItems[addedItems.length - 1];
+        showToast(
+          `<span>🎒 Получено предметов: <b>${addedItems.length}</b></span><small>Показать</small>`,
+          () => flyToMarker(lastId)
+        );
+      } else {
+        for (const iid of addedItems) {
+          const m = markerById[iid];
+          showToast(
+            `<span>🎒 Получен предмет: <b>${m ? m.name : iid}</b></span><small>Показать</small>`,
+            () => flyToMarker(iid)
+          );
+        }
+      }
+    }
     if (prevQuestSteps !== null && st.quests) {
       for (const [qid, qval] of Object.entries(st.quests)) {
         const oldSet = prevQuestSteps[qid] || new Set();
@@ -208,6 +248,8 @@
 
     prevGraces = nextGraces;
     prevBosses = nextBosses;
+    prevItems = nextItems;
+    prevLocations = nextLocations;
     prevQuestSteps = {};
     if (st.quests) {
       for (const [qid, qval] of Object.entries(st.quests)) {
@@ -219,6 +261,8 @@
     const nextAuto = {};
     for (const gid of nextGraces) nextAuto[gid] = true;
     for (const bid of nextBosses) nextAuto[bid] = true;
+    for (const iid of nextItems) nextAuto[iid] = true;
+    for (const lid of nextLocations) nextAuto[lid] = true;
     autoFound = nextAuto;
     autoQuests = st.quests || {};
 
@@ -226,7 +270,7 @@
       markerRefs.forEach(r => {
         if (!r.isRegion) {
           const on = !!(found[r.data.id] || autoFound[r.data.id]);
-          r.marker.setIcon(divIcon(r.cat, on));
+          r.marker.setIcon(divIcon(r.cat, on, r.data));
         }
       });
     }
@@ -299,6 +343,7 @@
     const q = new URLSearchParams({
       file: prefs.file || "",
       slot: String(prefs.slot || 0),
+      force: "1",
     });
     try {
       const res = await fetch(`/api/state?${q.toString()}`);
@@ -333,13 +378,13 @@
     fileSel.onchange = () => {
       prefs.file = fileSel.value;
       prefs.slot = 0;
-      prevGraces = null; prevBosses = null; prevQuestSteps = null;
+      prevGraces = null; prevBosses = null; prevItems = null; prevLocations = null; prevQuestSteps = null;
       saveCoopPrefs();
       connectSSE();
     };
     slotSel.onchange = () => {
       prefs.slot = parseInt(slotSel.value, 10) || 0;
-      prevGraces = null; prevBosses = null; prevQuestSteps = null;
+      prevGraces = null; prevBosses = null; prevItems = null; prevLocations = null; prevQuestSteps = null;
       saveCoopPrefs();
       connectSSE();
     };

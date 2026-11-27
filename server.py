@@ -19,7 +19,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
-from er_save_parser import SaveDataStore, discover_save_files, parse_save_state
+from er_save_parser import SaveDataStore, discover_save_files, parse_save_state, read_slot_checksum
 
 BASE_DIR = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
 WEB_DIR = BASE_DIR / "web"
@@ -49,18 +49,18 @@ class ZipAssetStore:
 
 
 class LiveStateManager:
-    """Caches parsed save state and refreshes only when file mtime/size changes."""
+    """Caches parsed save state and refreshes when mtime/size/checksum changes."""
 
     def __init__(self, store: SaveDataStore) -> None:
         self.store = store
         self._lock = threading.Lock()
-        self._cache: dict[tuple[str, int], tuple[int, int, dict[str, Any]]] = {}
+        self._cache: dict[tuple[str, int], tuple[int, int, str, dict[str, Any]]] = {}
 
     def default_save_path(self) -> str | None:
         saves = discover_save_files()
         return saves[0]["path"] if saves else None
 
-    def get_state(self, file_path: str | None, slot: int = 0) -> dict[str, Any]:
+    def get_state(self, file_path: str | None, slot: int = 0, force: bool = False) -> dict[str, Any]:
         target = file_path or self.default_save_path()
         if not target or not os.path.exists(target):
             return {"ok": False, "error": "Файл сохранения (.co2/.sl2) не найден."}
@@ -70,11 +70,18 @@ class LiveStateManager:
         except OSError as exc:
             return {"ok": False, "error": str(exc)}
 
+        checksum = read_slot_checksum(target, slot)
         key = (target, slot)
-        with self._lock:
-            cached = self._cache.get(key)
-            if cached and cached[0] == st.st_mtime_ns and cached[1] == st.st_size:
-                return {"ok": True, **cached[2]}
+        if not force:
+            with self._lock:
+                cached = self._cache.get(key)
+                if (
+                    cached
+                    and cached[0] == st.st_mtime_ns
+                    and cached[1] == st.st_size
+                    and cached[2] == checksum
+                ):
+                    return {"ok": True, **cached[3]}
 
         try:
             state = parse_save_state(self.store, target, slot)
@@ -82,7 +89,12 @@ class LiveStateManager:
             return {"ok": False, "error": str(exc)}
 
         with self._lock:
-            self._cache[key] = (int(state["mtime_ns"]), int(state["size"]), state)
+            self._cache[key] = (
+                int(state["mtime_ns"]),
+                int(state["size"]),
+                str(state.get("checksum", checksum)),
+                state,
+            )
         return {"ok": True, **state}
 
 
@@ -144,11 +156,12 @@ class TrackerHTTPHandler(SimpleHTTPRequestHandler):
         if parsed.path == "/api/state":
             file_path = qs.get("file", [None])[0]
             slot_raw = qs.get("slot", ["0"])[0]
+            force = qs.get("force", ["0"])[0] in ("1", "true", "yes")
             try:
                 slot = max(0, min(9, int(slot_raw)))
             except ValueError:
                 slot = 0
-            self._send_json(self.state_mgr.get_state(file_path, slot))
+            self._send_json(self.state_mgr.get_state(file_path, slot, force=force))
             return
 
         if parsed.path == "/api/events":
@@ -175,17 +188,17 @@ class TrackerHTTPHandler(SimpleHTTPRequestHandler):
         self.send_header("Connection", "keep-alive")
         self.end_headers()
 
-        last_sig: tuple[str, int, int] | None = None
+        last_sig: tuple[str, int, int, str] | None = None
         last_ping = time.monotonic()
 
         try:
             while True:
                 target = file_path or self.state_mgr.default_save_path()
-                sig: tuple[str, int, int] | None = None
+                sig: tuple[str, int, int, str] | None = None
                 if target and os.path.exists(target):
                     try:
                         st = os.stat(target)
-                        sig = (target, st.st_mtime_ns, st.st_size)
+                        sig = (target, st.st_mtime_ns, st.st_size, read_slot_checksum(target, slot))
                     except OSError:
                         sig = None
 

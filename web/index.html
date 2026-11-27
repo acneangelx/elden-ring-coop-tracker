@@ -211,7 +211,7 @@
       <div class="search-wrap">
         <div class="search">
           <span style="color:var(--muted);margin-right:7px">🔍</span>
-          <input id="search" placeholder="Поиск благодати, боссов, предметов…" autocomplete="off">
+          <input id="search" placeholder="Поиск локаций, благодати, боссов, предметов…" autocomplete="off">
         </div>
         <div id="results" class="results"></div>
       </div>
@@ -331,11 +331,12 @@ const catsEl = document.getElementById("cats");
 const groups = {};
 CATEGORIES.forEach(c => { (groups[c.group] ||= []).push(c); });
 
-function pinHtml(cat, isDone){
-  return `<div class="pin ${isDone?'done':''}" style="background:${cat.color};width:24px;height:24px">${cat.icon}</div>`;
+function pinHtml(cat, isDone, d){
+  const condTag = (d && d.cond) ? `<span class="pin-cond" title="${d.cond}">🌙</span>` : "";
+  return `<div class="pin ${isDone?'done':''}" style="background:${cat.color};width:24px;height:24px">${cat.icon}${condTag}</div>`;
 }
-function divIcon(cat, isDone){
-  return L.divIcon({ html: pinHtml(cat, isDone), className:"", iconSize:[24,24], iconAnchor:[12,12], popupAnchor:[0,-14] });
+function divIcon(cat, isDone, d){
+  return L.divIcon({ html: pinHtml(cat, isDone, d), className:"", iconSize:[24,24], iconAnchor:[12,12], popupAnchor:[0,-14] });
 }
 
 function regionIcon(name){
@@ -346,7 +347,7 @@ function makeMarker(d){
   const isRegion = d.cat === "region";
   const m = isRegion
     ? L.marker(xy(d.px, d.py), { icon: regionIcon(d.name), interactive:false, keyboard:false })
-    : L.marker(xy(d.px, d.py), { icon: divIcon(cat, isMarkerFound(d.id)), title: d.name });
+    : L.marker(xy(d.px, d.py), { icon: divIcon(cat, isMarkerFound(d.id), d), title: d.cond ? `${d.name} (🌙 ${d.cond})` : d.name });
   if(!isRegion){
     m.bindPopup(() => popupHtml(d, cat), { closeButton:true, minWidth: 220 });
     m.on("popupopen", () => bindPopup(d, cat, m));
@@ -406,6 +407,8 @@ function popupHtml(d, cat){
     if(bi.resist && bi.resist.length) bossHtml += `<div class="pop-stat pop-resist"><b>Сопротивление</b> ${dmgChips(bi.resist)}</div>`;
     if(bi.note) bossHtml += `<div class="pop-sum">🛡 ${bi.note}</div>`;
   } }
+  const condHtml = d.cond ? `<div class="pop-stat pop-cond">🌙 Условие появления: <b>${d.cond}</b></div>` : "";
+  const fallbackDesc = (cat.id === 'boss' && !m.statHtml && d.desc) ? `<div class="pop-stat">🪙 <b>${d.desc}</b></div>` : "";
   return `
     <div class="pop-head">${m.iconHtml}
       <div class="pop-head-t">
@@ -413,7 +416,7 @@ function popupHtml(d, cat){
         <div class="pop-t">${d.name}</div>
       </div>
     </div>
-    ${m.statHtml}${m.sumHtml}${bossHtml}
+    ${m.statHtml}${fallbackDesc}${condHtml}${m.sumHtml}${bossHtml}
     ${(d.desc && cat.id !== 'boss') ? `<div class="pop-d">${d.desc}</div>` : ""}
     <div class="pop-actions">
       <div class="pop-found ${on?'on':''}" data-id="${d.id}"><span>${on?'✓':'○'}</span><span>${autoOn ? 'Открыто в .co2' : (on?'Найдено':'Отметить найденным')}</span></div>
@@ -427,7 +430,7 @@ function bindPopup(d, cat, m){
     if(found[d.id]) delete found[d.id]; else found[d.id]=1;
     saveFound();
     const ref = markerRefs.find(r=>r.data.id===d.id);
-    ref.marker.setIcon(divIcon(cat, isMarkerFound(d.id)));
+    ref.marker.setIcon(divIcon(cat, isMarkerFound(d.id), d));
     m.setPopupContent(popupHtml(d,cat));
     bindPopup(d,cat,m);
     refreshCounts();
@@ -532,7 +535,7 @@ document.getElementById("allOff").onclick = () => setAll(false);
 document.getElementById("reset").onclick = () => {
   if(!confirm("Сбросить все ручные отметки «найдено»?")) return;
   found = {}; saveFound();
-  markerRefs.forEach(r => r.marker.setIcon(divIcon(r.cat, isMarkerFound(r.data.id))));
+  markerRefs.forEach(r => { if (!r.isRegion) r.marker.setIcon(divIcon(r.cat, isMarkerFound(r.data.id), r.data)); });
   refreshCounts();
 };
 document.getElementById("sbToggle").onclick = () => {
@@ -564,7 +567,7 @@ document.getElementById("importFile").onchange = (e) => {
       if(data && typeof data === "object"){
         Object.keys(data).forEach(k => found[k] = data[k]);
         saveFound();
-        markerRefs.forEach(r => r.marker.setIcon(divIcon(r.cat, !!found[r.data.id])));
+        markerRefs.forEach(r => { if (!r.isRegion) r.marker.setIcon(divIcon(r.cat, isMarkerFound(r.data.id), r.data)); });
         refreshCounts(); rebuildCluster();
         alert("Прогресс импортирован — " + Object.keys(found).length + " меток.");
       }
@@ -599,25 +602,33 @@ function restoreState(){
   refreshCounts(); rebuildCluster();
 }
 
-/* ---- Search: live results dropdown + fly-to ---- */
+/* ---- Search: live results dropdown across all 3 maps + fly-to ---- */
 const resultsEl = document.getElementById("results");
 function renderResults(){
   const q = searchEl.value.trim().toLowerCase();
   if(!q){ resultsEl.style.display="none"; resultsEl.innerHTML=""; return; }
-  const matches = markerRefs.filter(r => !r.isRegion && r.master===activeBase &&
-    (r.data.name.toLowerCase().includes(q) || (r.data.en||"").toLowerCase().includes(q) || (r.data.desc||"").toLowerCase().includes(q))).slice(0,15);
+  const matches = MARKERS.filter(m => m.cat !== "region" &&
+    (m.name.toLowerCase().includes(q) || (m.en||"").toLowerCase().includes(q) || (m.desc||"").toLowerCase().includes(q)))
+    .sort((a,b) => (a.master===activeBase ? 0 : 1) - (b.master===activeBase ? 0 : 1))
+    .slice(0,18);
   resultsEl.style.display="block";
-  if(!matches.length){ resultsEl.innerHTML='<div class="res-empty">На этой карте ничего не найдено</div>'; return; }
+  if(!matches.length){ resultsEl.innerHTML='<div class="res-empty">Ничего не найдено</div>'; return; }
   resultsEl.innerHTML="";
-  matches.forEach(r => {
+  matches.forEach(d => {
+    const cat = catById[d.cat];
+    if(!cat) return;
     const item = document.createElement("div"); item.className="res";
-    item.innerHTML = `<span class="res-ic" style="background:${r.cat.color}">${r.cat.icon}</span>`+
-      `<span class="res-nm">${r.data.name}</span><span class="res-cat">${r.cat.name}</span>`;
+    const mapBadge = d.master !== activeBase ? `<span class="res-map">${baseLabel(d.master)}</span>` : "";
+    item.innerHTML = `<span class="res-ic" style="background:${cat.color}">${cat.icon}</span>`+
+      `<span class="res-nm">${d.name}</span>${mapBadge}<span class="res-cat">${cat.name}</span>`;
     item.onmousedown = (e) => {            // mousedown fires before the input's blur
       e.preventDefault();
-      if(!catState[r.cat.id]){ catState[r.cat.id]=true; document.querySelector(`.cat[data-cat="${r.cat.id}"]`).classList.remove("off"); rebuildCluster(); }
-      resultsEl.style.display="none"; searchEl.value=r.data.name;
-      if (UNCLUSTERED_CATS[r.cat.id]) {
+      if(d.master !== activeBase) switchBase(d.master);
+      if(!catState[cat.id]){ catState[cat.id]=true; const row=document.querySelector(`.cat[data-cat="${cat.id}"]`); if(row) row.classList.remove("off"); rebuildCluster(); }
+      resultsEl.style.display="none"; searchEl.value=d.name;
+      const r = markerRefs.find(x => x.data.id === d.id);
+      if(!r) return;
+      if (UNCLUSTERED_CATS[cat.id]) {
         map.flyTo(r.marker.getLatLng(), Math.max(map.getZoom(), NZ - 1), { duration: 0.45 });
         setTimeout(() => r.marker.openPopup(), 320);
       } else {
@@ -654,10 +665,15 @@ let panelQuest = null;
 
 /* ---- quest progress (localStorage) ---- */
 const QSAVE_KEY = "er-map-quests-v1";
-let qsave = (function(){ try{ return JSON.parse(localStorage.getItem(QSAVE_KEY)) || {shown:{},done:{}}; }catch(e){ return {shown:{},done:{}}; } })();
-qsave.shown = qsave.shown || {}; qsave.done = qsave.done || {};
+let qsave = (function(){ try{ return JSON.parse(localStorage.getItem(QSAVE_KEY)) || {shown:{},done:{},override:{}}; }catch(e){ return {shown:{},done:{},override:{}}; } })();
+qsave.shown = qsave.shown || {}; qsave.done = qsave.done || {}; qsave.override = qsave.override || {};
 function saveQuests(){ try{ localStorage.setItem(QSAVE_KEY, JSON.stringify(qsave)); }catch(e){} }
-function isDone(id,n){ return !!( (qsave.done[id] && qsave.done[id][n]) || (window.COOP_AUTO && window.COOP_AUTO.isStepDone(id, n)) ); }
+function isDone(id,n){
+  if (qsave.override[id] && Object.prototype.hasOwnProperty.call(qsave.override[id], n)) {
+    return !!qsave.override[id][n];
+  }
+  return !!((qsave.done[id] && qsave.done[id][n]) || (window.COOP_AUTO && window.COOP_AUTO.isStepDone(id, n)));
+}
 function qProgress(q){ return { t:q.steps.length, d:q.steps.filter(s=>isDone(q.id,s.n)).length }; }
 function currentN(q){ const s = q.steps.find(s=>!isDone(q.id,s.n)); return s ? s.n : 0; }   // first incomplete step
 function baseLabel(m){ return m==='M01'?'Подземелья':(m==='M10'?'Земли Теней':'Междуземье'); }
@@ -706,7 +722,15 @@ function bindStepPopup(q, s, mk){
   if(el) el.onclick = () => { toggleStepDone(q, s.n); mk.setPopupContent(stepPopup(q,s)); bindStepPopup(q,s,mk); };
 }
 function toggleStepDone(q, n){
-  if(isDone(q.id,n)){ delete qsave.done[q.id][n]; } else { (qsave.done[q.id] ||= {})[n] = 1; }
+  const curDone = isDone(q.id, n);
+  const targetDone = !curDone;
+  const autoDone = !!(window.COOP_AUTO && window.COOP_AUTO.isStepDone(q.id, n));
+  if (qsave.done[q.id]) delete qsave.done[q.id][n];
+  if (targetDone === autoDone) {
+    if (qsave.override[q.id]) delete qsave.override[q.id][n];
+  } else {
+    (qsave.override[q.id] ||= {})[n] = targetDone;
+  }
   saveQuests();
   renderQuest(q); updateQuestRow(q);
   if(panelQuest && panelQuest.id===q.id) fillPanel(q);
@@ -736,7 +760,9 @@ function fillPanel(q){
   const rows = q.steps.map(s => {
     const done = isDone(q.id,s.n), isCur = s.n===cur, other = s.master!==activeBase;
     const reason = window.COOP_AUTO ? window.COOP_AUTO.getStepReason(q.id, s.n) : null;
-    const badge = reason ? `<span class="auto-badge ${reason.kind==='inferred'?'inferred':''}" title="${reason.text}">${reason.kind==='inferred'?'↳ Авто':'⚡ .co2'}</span>` : '';
+    const badge = (done && reason)
+      ? `<span class="auto-badge ${reason.kind==='inferred'?'inferred':''}" title="${reason.text}">${reason.kind==='inferred'?'↳ Авто':'⚡ .co2'}</span>`
+      : ((!done && reason) ? `<span class="auto-badge" style="color:var(--muted);border-color:var(--line);background:transparent" title="Автоотметка .co2 отключена вручную">✕ вручную</span>` : '');
     return `<div class="qs-row ${done?'done':''} ${isCur?'cur':''}" data-n="${s.n}">`+
       `<div class="qs-chk ${done?'on':''}" data-chk="${s.n}">${done?'✓':''}</div>`+
       `<div class="qs-num" style="background:${s.n===1?'#e5484d':q.color}">${s.n}</div>`+

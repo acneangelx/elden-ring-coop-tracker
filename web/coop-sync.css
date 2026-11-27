@@ -205,3 +205,55 @@
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Marker done check & nocturnal boss indicator */
+.pin {
+  position: relative;
+}
+.pin.done::after {
+  content: "✓";
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--good);
+  color: #09130c;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 13px;
+  text-align: center;
+  border: 1.5px solid #0d0f13;
+}
+.pin-cond {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #1a2138;
+  border: 1px solid #6b88d6;
+  font-size: 8.5px;
+  line-height: 12px;
+  text-align: center;
+  pointer-events: none;
+}
+.pop-cond {
+  color: #b7c8f8;
+  border-color: #3e528a;
+  background: #171d31;
+}
+.pop-cond b {
+  color: #e4ecff;
+}
+.res-map {
+  font-size: 9.5px;
+  color: var(--accent);
+  background: rgba(217, 164, 65, 0.12);
+  border: 1px solid rgba(217, 164, 65, 0.35);
+  border-radius: 4px;
+  padding: 1px 4px;
+  flex-shrink: 0;
+}
